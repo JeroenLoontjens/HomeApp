@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="AppForLogin.Views.Generic.RowGrid"
+    x:Name="This">
+
+    <Grid 
+          Padding="12"
+          ColumnSpacing="10"
+          RowSpacing="2"
+          Margin="0,0,0,8">
+       
+
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- LEFT ICON -->
+        <Image Grid.Column="0" 
+               Source="{Binding Source={x:Reference This}, Path=LeftIcon}"
+               WidthRequest="22"
+               HeightRequest="22"
+               Margin="{Binding Source={x:Reference This}, Path=IndentMargin}"
+               HorizontalOptions="Start"
+                VerticalOptions="Center"
+               IsVisible="{Binding Source={x:Reference This}, Path=HasLeftIcon}"/>
+
+        <!-- MAIN TEXT + SUBTEXT links van het midden kolom met 2 rijen-->
+        <Grid Grid.Column="1"
+              VerticalOptions="Center">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <Label Text="{Binding Source={x:Reference This}, Path=MainText}"
+                   FontSize="16"
+                   TextColor="Black"
+                   Grid.Row="0"/>
+
+            <Label Text="{Binding Source={x:Reference This}, Path=SubText}"
+                   FontSize="12"
+                   Grid.Row="1"
+                   TextColor="Gray"
+                   IsVisible="True"/>
+        </Grid>
+
+        <!-- RIGHT TEXT -->
+        <Label Grid.Column="2"
+               Text="{Binding Source={x:Reference This}, Path=RightText}"
+               FontSize="16"
+               TextColor="Black"
+               HorizontalTextAlignment="End"
+               VerticalTextAlignment="Center"
+               IsVisible="{Binding Source={x:Reference This}, Path=HasRightText}"/>
+
+        <!-- TOUCH EFFECT -->
+        <Grid.GestureRecognizers>
+            <TapGestureRecognizer 
+                Command="{Binding Source={x:Reference This}, Path=Command}"
+                NumberOfTapsRequired="2"
+                CommandParameter="{Binding Source={x:Reference This}, Path=CommandParameter}"/>
+        </Grid.GestureRecognizers>
+
+    </Grid>
+</ContentView>
+

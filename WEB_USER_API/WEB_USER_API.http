@@ -1,0 +1,19 @@
+@WEB_USER_API_HostAddress = https://localhost:7177
+
+GET {{WEB_USER_API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+
+POST {{WEB_USER_API_HostAddress}}/api/user
+Content-Type: application/json
+
+{
+  //AddUserDto
+}
+
+###
+
+GET {{WEB_USER_API_HostAddress}}/api/user
+
+###

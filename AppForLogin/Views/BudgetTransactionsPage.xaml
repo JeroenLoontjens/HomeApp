@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodel="clr-namespace:AppForLogin.ViewModel"
+             xmlns:model="clr-namespace:DataAccess.Model;assembly=DataAccess"
+             xmlns:converters="clr-namespace:AppForLogin.Converters"
+             xmlns:controls="clr-namespace:AppForLogin.Views.Generic"
+             x:Class="AppForLogin.Views.BudgetTransactionsPage"
+             x:DataType="viewmodel:TransactionsOverViewModel"
+             Title="Transactions"
+             BackgroundColor="White">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Color x:Key="PrimaryColor">#6B46C1</Color>
+            <Color x:Key="SecondaryColor">#E2E8F0</Color>
+            <Color x:Key="IncomeColor">#48BB78</Color>
+            <Color x:Key="ExpenseColor">#F56565</Color>
+            <converters:AmountToColorConverter x:Key="AmountToColorConverter" />
+            <converters:TransactionToSubTextConverter x:Key="TransactionToSubTextConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <!-- Use Grid so header can be persistent and CollectionView fills remaining space -->
+    <Grid RowDefinitions="Auto,Auto,Auto,*" ColumnDefinitions="*">
+        <Grid Grid.Row="0" RowDefinitions="Auto" ColumnDefinitions="Auto,*">
+            <!--<CollectionView ItemsSource="{Binding FilteredTransactions}"></CollectionView>-->
+            <!-- Row 0: Title -->
+            <Label Grid.Row="0"
+               Grid.Column="0"
+               Text="Transactions"
+               FontSize="24"
+               FontAttributes="Bold"
+               HorizontalOptions="Start"
+               Margin="16,16,16,0"
+               TextColor="{StaticResource PrimaryColor}" />
+            <Button Text="+" 
+            WidthRequest="56"
+            Grid.Row="0"
+            Grid.Column="1"
+            HeightRequest="56"
+            CornerRadius="28"
+            FontSize="24"
+            BackgroundColor="DodgerBlue"
+            TextColor="White"
+            Command="{Binding CreateTransactionCommand}"
+            HorizontalOptions="End"
+            VerticalOptions="End"
+            Margin="16" />
+        </Grid>
+
+        <!-- Row 1: Filters -->
+        <Frame Grid.Row="1"
+               CornerRadius="10"
+               Padding="16"
+               Margin="16,8,16,0"
+               BackgroundColor="{StaticResource SecondaryColor}">
+            <Grid ColumnDefinitions="1*,1*,Auto"
+                  RowDefinitions="Auto,Auto,Auto, Auto"
+                  ColumnSpacing="16"
+                  RowSpacing="8">
+                <Label Text="Filter Status:"
+                       TextColor="Black"
+                       Grid.Column="0" Grid.Row="0"
+                       FontSize="14"
+                       FontAttributes="Bold" />
+                <Picker ItemsSource="{Binding StatusOptions}"
+                        SelectedItem="{Binding SelectedStatus}"
+                        ItemDisplayBinding="{Binding .}"
+                        BackgroundColor="White"
+                        TextColor="Black"
+                        Grid.Column="0" Grid.Row="1"
+                        FontSize="14" />
+
+                <Label Text="Description:"
+                       TextColor="Black"
+                       Grid.Column="1" Grid.Row="0"
+                       FontSize="14"
+                       FontAttributes="Bold" />
+                <SearchBar Text="{Binding SearchText}"
+                           SearchCommand="{Binding ApplyFiltersCommand}"
+                           Placeholder="Search Description"
+                           TextColor="Black"
+                           BackgroundColor="White"
+                           Grid.Column="1" Grid.Row="1"
+                           FontSize="14" />
+
+                <Button Text="Reset"
+                        Command="{Binding ResetFiltersCommand}"
+                        Grid.Column="2" Grid.Row="1"
+                        BackgroundColor="{StaticResource PrimaryColor}"
+                        TextColor="White"
+                        CornerRadius="8"
+                        Padding="12,4"
+                        FontSize="14" />
+
+                <!-- Periode filters -->
+                <Label Text="Month:"
+                       TextColor="Black"
+                       Grid.Column="0" Grid.Row="2"
+                       FontSize="14"
+                       FontAttributes="Bold" />
+                <Picker Grid.Column="0" Grid.Row="3"
+                        ItemsSource="{Binding MonthOptions}"
+                        SelectedItem="{Binding SelectedMonth}"
+                        ItemDisplayBinding="{Binding Name}"
+                        BackgroundColor="White"
+                        TextColor="Black"
+                        IsEnabled="{Binding ShowPeriodFilters}"
+                        Opacity="{Binding ShowPeriodFilters, Converter={StaticResource BoolToOpacityConverter}}"
+                        FontSize="14" />
+
+                <Label Text="Year:"
+                       TextColor="Black"
+                       Grid.Column="1" Grid.Row="2"
+                       FontSize="14"
+                       FontAttributes="Bold" />
+                <Picker Grid.Column="1" Grid.Row="3"
+                        ItemsSource="{Binding Years}"
+                        SelectedItem="{Binding SelectedYear}"
+                        BackgroundColor="White"
+                        TextColor="Black"
+                        IsEnabled="{Binding ShowPeriodFilters}"
+                        Opacity="{Binding ShowPeriodFilters, Converter={StaticResource BoolToOpacityConverter}}"
+                        FontSize="14" />
+
+                <StackLayout Grid.Column="2" Grid.Row="3" Orientation="Horizontal" VerticalOptions="Center">
+                    <Label Text="Alles"
+                           VerticalTextAlignment="Center"
+                           TextColor="Black"
+                           FontSize="12"
+                           Margin="0,0,6,0" />
+                    <Switch IsToggled="{Binding SelectshowAll}" />
+                </StackLayout>
+            </Grid>
+        </Frame>
+
+        <!-- Row 2: Persistent header (will stay fixed above the scrollable list) -->
+        
+        <Grid Grid.Row="2" Padding="3" Margin="16,8,16,0" ColumnDefinitions="40,*,Auto" BackgroundColor="{StaticResource SecondaryColor}">
+            
+            <Label Grid.Column="0" />
+            <Label Grid.Column="1"
+                   Text="Description"
+                   FontSize="14"
+                   FontAttributes="Bold"
+                   TextColor="{StaticResource PrimaryColor}"
+                   VerticalTextAlignment="Center" />
+            <Label Grid.Column="2"
+                   Text="Amount"
+                   FontSize="14"
+                   FontAttributes="Bold"
+                   TextColor="{StaticResource PrimaryColor}"
+                   HorizontalTextAlignment="End"
+                   VerticalTextAlignment="Center" />
+            
+        </Grid>
+        
+        
+
+        <!-- Row 3: CollectionView - fills remaining space and is scrollable -->
+        <CollectionView Grid.Row="3"
+                        ItemsSource="{Binding FilteredTransactions}"
+                        SelectionMode="Single"
+                        SelectionChanged="OnTransactionSelected"
+                        Margin="16"
+                        VerticalOptions="Fill">
+            
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="1" />
+            </CollectionView.ItemsLayout>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="model:Transaction">
+                    <Border Stroke="White" StrokeThickness="1" Padding="0" Margin="0,0,0,8">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="24"/>
+                        </Border.StrokeShape>
+                        <controls:RowGrid
+                            LeftIcon="{Binding Status, Converter={StaticResource StatusToIconConverter}}"
+                            MainText="{Binding Description}"
+                            SubText="{Binding SubText}"
+                            RightText="{Binding Amount, StringFormat='€{0:F2}'}"
+                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenDetailPageCommand}"
+                            CommandParameter="{Binding .}"
+                            BackgroundColor="AliceBlue" />
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

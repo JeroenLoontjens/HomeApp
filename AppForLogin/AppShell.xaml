@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Shell
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:AppForLogin.Views"
+    x:Class="AppForLogin.AppShell">
+
+    <!-- Flyout header showing logged-in user -->
+    <Shell.FlyoutHeader>
+        <Grid BackgroundColor="#F0F0F0" Padding="16">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Label x:Name="HeaderNameLabel" FontAttributes="Bold" FontSize="16" Text="Not signed in" TextColor="Black"/>
+            <Label x:Name="HeaderRoleLabel" Grid.Row="1" FontSize="13" Text="Role: -" TextColor="Black"/>
+        </Grid>
+    </Shell.FlyoutHeader>
+
+    <!-- Flyout items / routes -->
+    <FlyoutItem Title="Home" FlyoutDisplayOptions="AsSingleItem">
+        <ShellContent Title="Home" ContentTemplate="{DataTemplate views:Homepage}" Route="Homepage" />
+    </FlyoutItem>
+
+    <!--<FlyoutItem Title="Users" FlyoutDisplayOptions="AsSingleItem">
+        <ShellContent Title="Manage Users" ContentTemplate="{DataTemplate views:UsersAdminPage}" Route="UsersAdminPage" />
+    </FlyoutItem>-->
+
+    <FlyoutItem Title="About" FlyoutDisplayOptions="AsSingleItem">
+        <ShellContent Title="About" ContentTemplate="{DataTemplate views:AboutPage}" Route="AboutPage" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Budget" >
+        <!-- Pagina voor transacties -->
+        <ShellContent Title="Transacties" ContentTemplate="{DataTemplate views:BudgetTransactionsPage}" />
+        <!-- Pagina voor dashboard -->
+        <ShellContent Title="Categories" ContentTemplate="{DataTemplate views:CategoriesPage}" />
+        <!-- Pagina voor plan -->
+        <ShellContent Title="Plan" ContentTemplate="{DataTemplate views:BudgetPlanPage}" />
+    </FlyoutItem>
+
+    <!--<FlyoutItem Title="Login" FlyoutDisplayOptions="AsSingleItem">
+        <ShellContent Title="login" ContentTemplate="{DataTemplate views:LoginPage}" Route="LoginPage" />
+    </FlyoutItem>-->
+
+    <MenuItem Text="Logout" Clicked="OnLogoutClicked"/>
+</Shell>

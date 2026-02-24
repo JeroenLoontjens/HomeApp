@@ -1,0 +1,1 @@
+Ik heb een breakpoint gezet op transactions. Bij debuggenn > Navigeren naar budgettransactionspage > 6 stuks transacties ingeladen >  niet alleen in de lijst transactions maar ook filtered transactions (viewmodel)

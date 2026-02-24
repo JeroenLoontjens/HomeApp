@@ -1,0 +1,96 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BudgetApp.Views.BudgetPage"
+             Title="Budgets">
+
+    <ContentPage.Resources>
+        <!-- Simpele DataTemplate voor een budgetregel -->
+        <DataTemplate x:Key="BudgetItemTemplate">
+            <Grid Padding="0,8" RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto">
+                <!-- Titel links, bedrag rechts -->
+                <Label Grid.Row="0" Grid.Column="0"
+                       Text="{Binding Name}"
+                       FontAttributes="Bold" />
+                <Label Grid.Row="0" Grid.Column="1"
+                       Text="{Binding SpentAndTotalText}"
+                       HorizontalTextAlignment="End" />
+
+                <!-- Progress + remaining -->
+                <Grid Grid.Row="1" Grid.ColumnSpan="2" ColumnDefinitions="*,Auto" Margin="0,4,0,0">
+                    <ProgressBar Grid.Column="0"
+                                 Progress="{Binding Progress}"
+                                 HeightRequest="6"
+                                 VerticalOptions="Center"
+                                 BackgroundColor="#eeeeee"
+                                 ProgressColor="#4CAF50" />
+                    <Label Grid.Column="1"
+                           Text="{Binding RemainingText}"
+                           FontSize="12"
+                           TextColor="Gray"
+                           Margin="8,0,0,0" />
+                </Grid>
+            </Grid>
+        </DataTemplate>
+
+        <!-- Template voor een groep (Food & Dining, Shopping, etc.) -->
+        <DataTemplate x:Key="BudgetGroupTemplate">
+            <StackLayout Padding="0,12">
+                <Label Text="{Binding Name}"
+                       FontAttributes="Bold"
+                       FontSize="16"
+                       TextColor="#555" />
+                <CollectionView ItemsSource="{Binding Items}"
+                                ItemTemplate="{StaticResource BudgetItemTemplate}"
+                                SelectionMode="None" />
+            </StackLayout>
+        </DataTemplate>
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="16">
+
+            <!-- Header -->
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Text="Budgets"
+                       FontSize="24"
+                       FontAttributes="Bold" />
+                <Label Text="Updated 2 minutes ago"
+                       FontSize="12"
+                       TextColor="Gray"
+                       HorizontalTextAlignment="End" />
+            </Grid>
+
+            <!-- Overall blok -->
+            <Frame Padding="12" CornerRadius="8" HasShadow="False" BackgroundColor="#f5f5f5">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Budget"
+                           FontAttributes="Bold"
+                           FontSize="18" />
+                    <Label Text="April 2015"
+                           FontSize="12"
+                           TextColor="Gray" />
+
+                    <Label Text="{Binding Overall.SpentAndTotalText}"
+                           FontAttributes="Bold"
+                           Margin="0,8,0,0" />
+
+                    <ProgressBar Progress="{Binding Overall.Progress}"
+                                 HeightRequest="8"
+                                 BackgroundColor="#e0e0e0"
+                                 ProgressColor="#2196F3" />
+
+                    <Label Text="{Binding Overall.RemainingText}"
+                           FontSize="12"
+                           TextColor="Gray"
+                           HorizontalTextAlignment="End" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Groepen met categorieën -->
+            <CollectionView ItemsSource="{Binding Groups}"
+                            ItemTemplate="{StaticResource BudgetGroupTemplate}"
+                            SelectionMode="None" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

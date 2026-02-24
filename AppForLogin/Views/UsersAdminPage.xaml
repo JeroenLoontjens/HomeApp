@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:AppForLogin.Converters"
+             xmlns:viewmodel="clr-namespace:AppForLogin.ViewModel"
+             x:DataType="viewmodel:UsersAdminViewModel"
+             x:Class="AppForLogin.Views.UsersAdminPage"
+             xmlns:localConverters="clr-namespace:AppForLogin.Converters"
+             xmlns:model="clr-namespace:AppForLogin.Model"
+             x:Name="UserAdminPage"
+             Title="Users Admin">
+
+
+    <VerticalStackLayout Padding="20" Spacing="15">
+        <!-- Titel -->
+        <Label Text="User Administration" FontSize="24" HorizontalOptions="Center" />
+        <!-- Lijst van users -->
+        <CollectionView ItemsSource="{Binding Users}" SelectionMode="Single" SelectedItem="{Binding SelectedUser}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="model:User">
+                    <Border  Padding="10" Margin="5" BackgroundColor="AliceBlue">
+                        <VerticalStackLayout>
+                            <Label Text="{Binding Name}" FontAttributes="Bold" TextColor="Black"/>
+                            <Label Text="{Binding Email}" FontSize="12" TextColor="Black"/>
+                            <Label Text="{Binding Role}" FontSize="12" TextColor="Gray"/>
+                            <Label Text="{Binding Phone}" FontSize="12" TextColor="Gray"/>
+                            <Button Text="Delete"
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:UsersAdminViewModel}}, Path=DeleteUserCommand}"
+                                CommandParameter="{Binding Id}"
+                                BackgroundColor="Red"
+                                TextColor="White"
+                                FontSize="12"
+                                HorizontalOptions="End"/>
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+        <!-- Formulier -->
+        <Entry Placeholder="Name" Text="{Binding Name}" />
+        <Entry Placeholder="Email" Text="{Binding Email}" Keyboard="Email" />
+        <Entry Placeholder="Phone" Text="{Binding Phone}"  />
+        <Entry Placeholder="Role" Text="{Binding Role}" />
+        <Label TextColor="White" Text="{Binding Id}" />
+        <!-- Knoppen -->
+        <HorizontalStackLayout Spacing="10">
+            <Button Text="Add User" Command="{Binding AddCommand}" />
+            <Button Text="Save Edit" Command="{Binding SaveEditCommand}" IsEnabled="{Binding SelectedUser, Converter={StaticResource NullToBoolConverter}}" />
+            <Button Text="Load Users" Command="{Binding LoadCommand}" />
+        </HorizontalStackLayout>
+    </VerticalStackLayout>
+
+
+</ContentPage>

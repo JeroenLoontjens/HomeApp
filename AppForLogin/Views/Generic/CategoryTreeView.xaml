@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:AppForLogin.Views.Generic"
+             x:Class="AppForLogin.Views.Generic.CategoryTreeView">
+    <VerticalStackLayout BackgroundColor="Transparent">
+        <Border
+                     
+            
+            BackgroundColor="Transparent"
+            >
+
+
+
+            <!-- Header -->
+            <Grid Padding="10" ColumnDefinitions="30, *" BackgroundColor="AliceBlue">
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ToggleExpandCommand}" />
+                </Grid.GestureRecognizers>
+
+                <Image
+                Source="{Binding Icon}"
+                BackgroundColor="AliceBlue"
+                HeightRequest="20"
+                WidthRequest="20"
+                Scale="0.5"
+                Rotation="{Binding IsExpanded, Converter={StaticResource BoolToRotationConverter}}">
+
+                </Image>
+
+                <Label 
+            Grid.Column="1"
+            Text="{Binding Category.Name}"
+                TextColor="Black"
+            Margin="{Binding Level, Converter={StaticResource LevelToIndentConverter}}" />
+            </Grid>
+        </Border>
+        <Border >          
+                      
+                        
+            <!-- Children -->
+            <CollectionView 
+        ItemsSource="{Binding Children}"
+        
+        IsVisible="{Binding IsExpanded}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <local:CategoryTreeView />
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Border>
+
+    </VerticalStackLayout>
+</ContentView>

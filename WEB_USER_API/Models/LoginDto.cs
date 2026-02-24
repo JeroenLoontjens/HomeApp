@@ -1,0 +1,10 @@
+﻿namespace WEB_USER_API.Models
+{
+    public class LoginDto
+    {
+
+        public required string Email { get; set; }
+        public required string Password { get; set; } // plain text input
+    }
+}
+

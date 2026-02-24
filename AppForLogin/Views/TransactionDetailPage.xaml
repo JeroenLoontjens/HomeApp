@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:model="clr-namespace:DataAccess.Model;assembly=DataAccess"
+             x:Class="AppForLogin.Views.TransactionDetailPage"
+             xmlns:viewmodels="clr-namespace:AppForLogin.ViewModel"
+             xmlns:controls="clr-namespace:AppForLogin.Views.Generic"
+             Title="Transaction Details">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="12">
+
+            <Label Text="Description" />
+            <Entry Text="{Binding Transaction.Description}" Placeholder="Omschrijving" />
+
+            <Label Text="Amount" />
+            <Entry Text="{Binding Transaction.Amount}" Keyboard="Numeric" />
+
+            <Label Text="Date" />
+            <DatePicker Date="{Binding Transaction.Date}" />
+
+            <Label Text="Status" />
+            <Picker Title="Status"
+                    ItemsSource="{x:Static model:StatusValues.All}"
+                    SelectedItem="{Binding Transaction.Status}" />
+
+            <Label Text="Is Income" />
+            <Switch IsToggled="{Binding Transaction.IsIncome}" />
+
+            <!-- Split card -->
+            <Frame Padding="12" CornerRadius="16" BackgroundColor="#F2F6FF">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Splitsing toevoegen" FontAttributes="Bold" />
+
+                    <SearchBar Placeholder="Zoek BudgetLine..."
+                   Text="{Binding BudgetLineSearchText}" />
+
+                    <Picker Title="BudgetLine"
+                ItemsSource="{Binding FilteredBudgetLines}"
+                ItemDisplayBinding="{Binding Category.Name}"
+                SelectedItem="{Binding SelectedBudgetLine}" />
+
+                    <Entry Placeholder="Bedrag"
+               Text="{Binding SplitAmount}"
+               Keyboard="Numeric" />
+
+                    <Button Text="+ Split toevoegen"
+                Command="{Binding AddSplitCommand}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Split lijst -->
+            <CollectionView ItemsSource="{Binding Transaction.TransactionBudgetLines}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="model:TransactionBudgetLine">
+                        <controls:RowGrid
+                MainText="{Binding BudgetLine.Category.Name}"
+                SubText="{Binding BudgetLine.Notes}"
+                RightText="{Binding AmountAllocated, StringFormat='€{0:F2}'}"
+                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveSplitCommand}"
+                CommandParameter="{Binding .}" />
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+
+            <!-- Buttons -->
+            <HorizontalStackLayout Spacing="12">
+                <Button Text="Save"
+                        Command="{Binding SaveCommand}"
+                        IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}" />
+
+                <Button Text="Delete"
+                        Command="{Binding DeleteCommand}"
+                        IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}" />
+           
+                <Button Text="Approve"
+                        Command="{Binding ApproveCommand}"
+                        IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}" />
+
+                <Button Text="Cancel"
+                        Command="{Binding CancelCommand}" />
+            </HorizontalStackLayout>
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+
+</ContentPage>

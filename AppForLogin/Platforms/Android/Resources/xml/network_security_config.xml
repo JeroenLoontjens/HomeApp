@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Toestaat HTTP-verkeer voor ontwikkeling -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">10.0.2.2</domain>
+        <domain includeSubdomains="true">localhost</domain>
+    </domain-config>
+    <!-- Toestaat HTTP-verkeer voor alle domeinen (alleen voor ontwikkeling!) -->
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>
