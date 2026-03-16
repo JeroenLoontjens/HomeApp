@@ -178,7 +178,7 @@
                         <controls:RowGrid
                             LeftIcon="{Binding Status, Converter={StaticResource StatusToIconConverter}}"
                             MainText="{Binding Description}"
-                            SubText="{Binding SubText}"
+                            SubText="{Binding ., Converter={StaticResource TransactionToSubTextConverter}}"
                             RightText="{Binding Amount, StringFormat='€{0:F2}'}"
                             Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenDetailPageCommand}"
                             CommandParameter="{Binding .}"

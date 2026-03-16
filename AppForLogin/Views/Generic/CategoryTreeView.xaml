@@ -3,53 +3,61 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:AppForLogin.Views.Generic"
              x:Class="AppForLogin.Views.Generic.CategoryTreeView">
-    <VerticalStackLayout BackgroundColor="Transparent">
-        <Border
-                     
-            
-            BackgroundColor="Transparent"
-            >
 
+    <VerticalStackLayout BackgroundColor="Transparent" Spacing="0">
 
+        <!-- Header row (Category) -->
+        <Border Stroke="White"
+                StrokeThickness="1"
+                Padding="0"
+                Margin="0,0,0,6"
+                BackgroundColor="Transparent">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="16" />
+            </Border.StrokeShape>
 
-            <!-- Header -->
-            <Grid Padding="10" ColumnDefinitions="30, *" BackgroundColor="AliceBlue">
-                <Grid.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding ToggleExpandCommand}" />
-                </Grid.GestureRecognizers>
+            <Grid Padding="0"
+                  ColumnDefinitions="44,*"
+                  BackgroundColor="Transparent">
 
-                <Image
-                Source="{Binding Icon}"
-                BackgroundColor="AliceBlue"
-                HeightRequest="20"
-                WidthRequest="20"
-                Scale="0.5"
-                Rotation="{Binding IsExpanded, Converter={StaticResource BoolToRotationConverter}}">
+                <!-- The actual row content in Transaction look & feel -->
+                <local:RowGrid Grid.Column="0"
+                               Grid.ColumnSpan="2"
+                               LeftIcon="{Binding Category.Icon}"
+                               LeftIconBackgroundColor="{Binding Category.ColorHex}"
+                               MainText="{Binding Category.Name}"
+                               SubText="{Binding SubText}"
+                               IndentLevel="{Binding Level}"
+                               BackgroundColor="AliceBlue"
+                               Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenCategoryDetailCommand}"
+                               CommandParameter="{Binding .}" />
 
-                </Image>
-
-                <Label 
-            Grid.Column="1"
-            Text="{Binding Category.Name}"
-                TextColor="Black"
-            Margin="{Binding Level, Converter={StaticResource LevelToIndentConverter}}" />
+                <!-- Chevron button on top (separate tap target for expand/collapse) -->
+                <ImageButton Grid.Column="1"
+                             Source="{Binding Icon}"
+                             BackgroundColor="Transparent"
+                             WidthRequest="10"
+                             HeightRequest="10"
+                             Scale="0.5"
+                             Padding="4"
+                             Margin="6,0,0,0"
+                             HorizontalOptions="End"
+                             VerticalOptions="Center"
+                             Command="{Binding ToggleExpandCommand}"
+                             IsVisible="{Binding HasChildren}" />
             </Grid>
         </Border>
-        <Border >          
-                      
-                        
-            <!-- Children -->
-            <CollectionView 
-        ItemsSource="{Binding Children}"
-        
-        IsVisible="{Binding IsExpanded}">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <local:CategoryTreeView />
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </Border>
+
+        <!-- Children -->
+        <CollectionView ItemsSource="{Binding Children}"
+                        IsVisible="{Binding IsExpanded}"
+                        Margin="0,0,0,6">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <local:CategoryTreeView />
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
 
     </VerticalStackLayout>
 </ContentView>

@@ -5,7 +5,7 @@
              x:DataType="viewmodel:LoginPageViewModel"
              x:Class="AppForLogin.Views.LoginPage"
              Title="LoginPage">
-    <VerticalStackLayout>
+    <VerticalStackLayout BackgroundColor="White">
         <!--This image logo-->
         <Border  BackgroundColor="White" WidthRequest="120" HeightRequest="120" Margin="0,20,0,0" Padding="0">
             <Image Source="user.png" BackgroundColor="White" HeightRequest="80" WidthRequest="80" VerticalOptions="Center" HorizontalOptions="Center"></Image>
@@ -21,17 +21,17 @@
             <!--this is for email adres-->
             <StackLayout Orientation="Horizontal" Grid.Row="0">
                 <Image Source="user.png" BackgroundColor="White" WidthRequest="30" HeightRequest="30"></Image>
-                <Entry Text="{Binding Email}" TextColor="Black" HeightRequest="50" WidthRequest="300" Margin="10,0,0,0" Placeholder="Email adres" FontAttributes="Bold"></Entry>
+                <Entry Text="{Binding Email}" TextColor="LightGray" BackgroundColor="AliceBlue" HeightRequest="50" WidthRequest="300" Margin="10,0,0,0" Placeholder="Email adres" FontAttributes="Bold"></Entry>
             </StackLayout>
             <!--this is for password adres-->
             <StackLayout Orientation="Horizontal" Grid.Row="1">
                 <Image Source="lock.png" BackgroundColor="White" WidthRequest="30" HeightRequest="30"></Image>
-                <Entry Text="{Binding Password}" TextColor="Black" IsPassword="True" HeightRequest="50" WidthRequest="300" Margin="10,0,0,0" Placeholder="Password" FontAttributes="Bold"></Entry>
+                <Entry Text="{Binding Password}" TextColor="LightGray" IsPassword="True" BackgroundColor="AliceBlue" HeightRequest="50" WidthRequest="300" Margin="10,0,0,0" Placeholder="Password" FontAttributes="Bold"></Entry>
             </StackLayout>
             <!--this is remember me en forgot password checkbox-->
             <StackLayout Grid.Row="2" Margin="35,0,0,0" Orientation="Horizontal">
                 <CheckBox IsChecked="{Binding RememberMe}"></CheckBox>
-                <Label Text="Remenber Me" FontAttributes="Bold" Margin="-10,13,0,0"></Label>
+                <Label Text="Remenber Me" FontAttributes="Bold" TextColor="Black" Margin="-10,13,0,0"></Label>
                 <!--<Button Text="Forgot password" Background="Transparent" TextColor="IndianRed" FontAttributes="Bold" BorderWidth="0" Margin="50,0,0,0"></Button>-->
             </StackLayout>
         </Grid>

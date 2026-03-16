@@ -11,164 +11,177 @@ namespace AppForLogin.Services
 {
     public class BudgetService
     {
-        private readonly BudgetDBContext _context;
+        private readonly IDbContextFactory<BudgetDBContext> _contextFactory;
 
-        public BudgetService(BudgetDBContext context)
+        public BudgetService(IDbContextFactory<BudgetDBContext> contextFactory)
         {
-            _context = context;
+            _contextFactory = contextFactory;
         }
 
         #region BudgetItem Methods
         public async Task<List<BudgetLine>> GetAllBudgetItemsAsync()
         {
-            return await _context.BudgetLines
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            return await context.BudgetLines
+                .AsNoTracking()
                 .Include(b => b.Category)
                 .Include(b => b.TransactionBudgetLines)
                     .ThenInclude(tbl => tbl.Transaction)
                         .ThenInclude(t => t.Category)
                 .ToListAsync();
-                            
         }
 
-        // zelfde maar dan met ID
         public async Task<BudgetLine?> GetBudgetItemByIdAsync(int id)
         {
-            return await _context.BudgetLines
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            return await context.BudgetLines
+                .AsNoTracking()
                 .Include(b => b.Category)
                 .Include(b => b.TransactionBudgetLines)
                     .ThenInclude(tbl => tbl.Transaction)
-                        .ThenInclude(t => t.Category)   
+                        .ThenInclude(t => t.Category)
                 .FirstOrDefaultAsync(b => b.Id == id);
         }
 
-        //BudgetItem toevoegen
         public async Task AddBudgetItemAsync(BudgetLine item)
         {
-            _context.BudgetLines.Add(item);
-            await  _context.SaveChangesAsync();
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            context.BudgetLines.Add(item);
+            await context.SaveChangesAsync();
         }
 
-        // BudgetItem bijwerken
         public async Task UpdateBudgetItemAsync(BudgetLine item)
         {
-            _context.BudgetLines.Update(item);
-            await _context.SaveChangesAsync();
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            context.BudgetLines.Update(item);
+            await context.SaveChangesAsync();
         }
 
-        // BudgetItem verwijderen
         public async Task DeleteBudgetItemAsync(int id)
         {
-            var item = await GetBudgetItemByIdAsync(id);
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            var item = await context.BudgetLines.FirstOrDefaultAsync(b => b.Id == id);
             if (item != null)
             {
-                _context.BudgetLines.Remove(item);
-                await _context.SaveChangesAsync();
+                context.BudgetLines.Remove(item);
+                await context.SaveChangesAsync();
             }
         }
         #endregion
 
         #region Category Methods
-        // Alle categorieën ophalen
         public async Task<List<Category>> GetAllCategoriesAsync()
         {
-            return await _context.Categories.ToListAsync();
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            return await context.Categories.ToListAsync();
         }
 
-        // Categorie ophalen door ID
         public async Task<Category?> GetCategoryByIdAsync(int id)
         {
-            return await _context.Categories.FirstOrDefaultAsync(c => c.Id == id);
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            return await context.Categories.FirstOrDefaultAsync(c => c.Id == id);
         }
 
-        // Nieuwe categorie toevoegen
         public async Task AddCategoryAsync(Category category)
         {
-            _context.Categories.Add(category);
-            await _context.SaveChangesAsync();
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            context.Categories.Add(category);
+            await context.SaveChangesAsync();
         }
 
-        // Categorie bijwerken
         public async Task UpdateCategoryAsync(Category category)
         {
-            _context.Categories.Update(category);
-            await _context.SaveChangesAsync();
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            context.Categories.Update(category);
+            await context.SaveChangesAsync();
         }
 
-        // Categorie verwijderen
         public async Task DeleteCategoryAsync(int id)
         {
-            var category = await GetCategoryByIdAsync(id);
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            var category = await context.Categories.FirstOrDefaultAsync(c => c.Id == id);
             if (category != null)
             {
-                _context.Categories.Remove(category);
-                await _context.SaveChangesAsync();
+                context.Categories.Remove(category);
+                await context.SaveChangesAsync();
             }
         }
         #endregion
 
         #region Transaction Methods
-        // Alle transacties ophalen met gerelateerde categorieën (eager loading)
         public async Task<List<Transaction>> GetAllTransactionsAsync()
         {
-            return await _context.Transactions
-                .Include(t => t.Category)  // Laad de gerelateerde Category
-                .Include(t => t.TransactionBudgetLines) // Laad gerelateerde TransactionBudgetLines
-                    .ThenInclude(tbl => tbl.BudgetLine) // Laad gerelateerde BudgetLine binnen TransactionBudgetLines
-                .ToListAsync();
-        }
-
-        //Idem als hierboven maar met alleen een specifieke maand
-        public async Task<List<Transaction>> GetTransactionsPerMonthAsync(DateTime date)
-        {
-            var Date = date;
-            return await _context.Transactions
-                .Where(t => t.Date.Month == Date.Month && t.Date.Year == Date.Year)
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            return await context.Transactions
+                .AsNoTracking()
                 .Include(t => t.Category)
                 .Include(t => t.TransactionBudgetLines)
                     .ThenInclude(tbl => tbl.BudgetLine)
+                        .ThenInclude(b => b.Category)
                 .ToListAsync();
         }
 
-        // Transactie ophalen door ID met gerelateerde categorie
+        public async Task<List<Transaction>> GetTransactionsPerMonthAsync(DateTime date)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            return await context.Transactions
+                .AsNoTracking()
+                .Where(t => t.Date.Month == date.Month && t.Date.Year == date.Year)
+                .Include(t => t.Category)
+                .Include(t => t.TransactionBudgetLines)
+                    .ThenInclude(tbl => tbl.BudgetLine)
+                        .ThenInclude(b => b.Category)
+                .ToListAsync();
+        }
+
         public async Task<Transaction?> GetTransactionByIdAsync(int id)
         {
-            return await _context.Transactions
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            return await context.Transactions
+                .AsNoTracking()
                 .Include(t => t.Category)
+                .Include(t => t.TransactionBudgetLines)
+                    .ThenInclude(tbl => tbl.BudgetLine)
+                        .ThenInclude(b => b.Category)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
-        // Nieuwe transactie toevoegen
         public async Task AddTransactionAsync(Transaction transaction)
         {
-            _context.Transactions.Add(transaction);
-            await _context.SaveChangesAsync();
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            PrepareTransactionForSave(transaction);
+            context.Transactions.Add(transaction);
+            await context.SaveChangesAsync();
         }
 
-        // Transactie bijwerken
         public async Task UpdateTransactionAsync(Transaction transaction)
         {
-            _context.Transactions.Update(transaction);
-            await _context.SaveChangesAsync();
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            PrepareTransactionForSave(transaction);
+            context.Transactions.Update(transaction);
+            await context.SaveChangesAsync();
         }
 
-        // Transactie verwijderen
         public async Task DeleteTransactionAsync(int id)
         {
-            var transaction = await GetTransactionByIdAsync(id);
-            if (transaction != null)
-            {
-                _context.Transactions.Remove(transaction);
-                await _context.SaveChangesAsync();
-            }
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            var stub = new Transaction { Id = id };
+            context.Entry(stub).State = EntityState.Deleted;
+            await context.SaveChangesAsync();
         }
 
-        // Transacties ophalen voor een specifieke categorie met gerelateerde categorieën
-        public async Task<List<Transaction>> GetTransactionsByCategoryIdAsync(int categoryId)
+        private static void PrepareTransactionForSave(Transaction transaction)
         {
-            return await _context.Transactions
-                .Include(t => t.Category)
-                .Where(t => t.CategoryId == categoryId)
-                .ToListAsync();
+            transaction.Category = null;
+
+            if (transaction.TransactionBudgetLines == null)
+                return;
+
+            foreach (var split in transaction.TransactionBudgetLines)
+            {
+                split.Transaction = null;
+                split.BudgetLine = null;
+            }
         }
         #endregion
     }

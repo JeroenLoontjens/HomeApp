@@ -61,7 +61,7 @@ namespace AppForLogin
                 connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
             }
 
-            builder.Services.AddDbContext<BudgetDBContext>(options =>
+            builder.Services.AddDbContextFactory<BudgetDBContext>(options =>
             {
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
             });

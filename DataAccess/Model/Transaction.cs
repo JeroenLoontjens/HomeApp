@@ -48,7 +48,7 @@ namespace DataAccess.Model
         [ObservableProperty]
         private ObservableCollection<TransactionBudgetLine> transactionBudgetLines = new();
 
-        public string SubText => $"{Date:dd MMM yyyy} • {Category.Name}";
+        
        
 
         public Transaction()
@@ -63,20 +63,12 @@ namespace DataAccess.Model
         {
             value.CollectionChanged += TransactionBudgetLinesChanged;
             UpdateCategoryFromSplits();
-            OnPropertyChanged(nameof(SubText));
         }
 
         private void TransactionBudgetLinesChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             UpdateCategoryFromSplits();
-            OnPropertyChanged(nameof(SubText));
         }
-
-
-
-        partial void OnDateChanged(DateTime value) => OnPropertyChanged(nameof(SubText));
-        partial void OnStatusChanged(StatusTrans value) => OnPropertyChanged(nameof(SubText));
-        partial void OnCategoryChanged(Category value) => OnPropertyChanged(nameof(SubText));
 
 
 

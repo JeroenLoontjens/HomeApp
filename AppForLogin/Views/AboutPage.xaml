@@ -8,5 +8,22 @@
             Text="Welcome to .NET MAUI!"
             VerticalOptions="Center" 
             HorizontalOptions="Center" />
+        <Border WidthRequest="36"
+                HeightRequest="36"
+                BackgroundColor="Black"
+                StrokeThickness="0"
+                HorizontalOptions="Start"
+                VerticalOptions="Center">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="18" />
+            </Border.StrokeShape>
+
+            <Image Source="sports_tennis.png"
+                   WidthRequest="20"
+                   HeightRequest="20"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   Aspect="AspectFit" />
+        </Border>
     </VerticalStackLayout>
 </ContentPage>

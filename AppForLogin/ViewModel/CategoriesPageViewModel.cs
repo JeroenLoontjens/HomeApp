@@ -63,8 +63,11 @@ namespace AppForLogin.ViewModel
                 };
 
                 parentvm.Children.Add(childVm);
+                
                 BuildTree(childVm, allCategories);
             }
+
+            
         }
 
        

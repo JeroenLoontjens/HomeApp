@@ -6,6 +6,7 @@ using Microsoft.Maui.Controls;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace AppForLogin.ViewModel
@@ -25,6 +26,8 @@ namespace AppForLogin.ViewModel
         private decimal SplitTotal => Transaction?.TransactionBudgetLines.Sum(x => x.AmountAllocated) ?? 0;
         private bool SplitsMatchTotal => Transaction != null && SplitTotal == Transaction.Amount;
 
+        private Transaction _navigationTransaction;
+        private Transaction _originalTransaction;
 
         public ObservableCollection<BudgetLine> BudgetLines { get; } = [];
         public ObservableCollection<BudgetLine> FilteredBudgetLines { get; } = [];
@@ -45,11 +48,7 @@ namespace AppForLogin.ViewModel
             ApplyBudgetLineFilter();
         }
 
-        partial void OnBudgetLineSearchTextChanged(string value)
-        {
-                ApplyBudgetLineFilter();
-        }
-        
+        partial void OnBudgetLineSearchTextChanged(string value) => ApplyBudgetLineFilter();
 
         private void ApplyBudgetLineFilter()
         {
@@ -59,48 +58,75 @@ namespace AppForLogin.ViewModel
             if (!string.IsNullOrWhiteSpace(BudgetLineSearchText))
             {
                 filtered = filtered.Where(b =>
-                    b.Category?.Name?.Contains(BudgetLineSearchText, StringComparison.OrdinalIgnoreCase) == true
-                    || b.Notes?.Contains(BudgetLineSearchText, StringComparison.OrdinalIgnoreCase) == true);
+                    b.Category?.Name?.Contains(BudgetLineSearchText, StringComparison.OrdinalIgnoreCase) == true ||
+                    b.Notes?.Contains(BudgetLineSearchText, StringComparison.OrdinalIgnoreCase) == true);
             }
 
             foreach (var item in filtered)
                 FilteredBudgetLines.Add(item);
-        }      
-
-
+        }
 
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
             if (query.TryGetValue("Transaction", out var value) && value is Transaction t)
             {
                 if (t.Date == default)
-                {
                     t.Date = DateTime.Now;
-                }
-                Transaction = t;
+
+                _navigationTransaction = t;
+                _originalTransaction = CloneTransaction(t);
+                Transaction = CloneTransaction(t);
             }
             else
             {
-                // No ID means we're creating a new transaction
-                Transaction = new Transaction { Date = DateTime.Now };
+                var newTransaction = new Transaction { Date = DateTime.Now };
+                _navigationTransaction = newTransaction;
+                _originalTransaction = CloneTransaction(newTransaction);
+                Transaction = CloneTransaction(newTransaction);
             }
         }
 
-        #region Split Commands 
+        #region Split Commands
         [RelayCommand]
-        private void AddSplit()
+        private async Task AddSplit()
         {
-            if (SelectedBudgetLine == null || SplitAmount <= 0)
+            if (SelectedBudgetLine == null || SplitAmount <= 0 || Transaction is null)
                 return;
 
-            Transaction.TransactionBudgetLines.Add(new TransactionBudgetLine
-            {
-                BudgetLine = SelectedBudgetLine,
-                BudgetLineId = SelectedBudgetLine.Id,
-                AmountAllocated = SplitAmount
-            });
+            Transaction.TransactionBudgetLines ??= new ObservableCollection<TransactionBudgetLine>(); // dit betekent dat er nog geen splits zijn, dus we maken een nieuwe lijst aan
 
-            // reset input
+            var existingSplit = Transaction.TransactionBudgetLines
+                .FirstOrDefault(x => x.BudgetLineId == SelectedBudgetLine.Id);
+
+            if (existingSplit != null)
+            {
+                var index = Transaction.TransactionBudgetLines.IndexOf(existingSplit);
+                var mergedSplit = new TransactionBudgetLine
+                {
+                    TransactionId = existingSplit.TransactionId,
+                    BudgetLineId = existingSplit.BudgetLineId,
+                    BudgetLine = existingSplit.BudgetLine,
+                    AmountAllocated = existingSplit.AmountAllocated + SplitAmount
+                };
+
+                Transaction.TransactionBudgetLines[index] = mergedSplit;
+
+                await Shell.Current.DisplayAlertAsync(
+                    "Split samengevoegd",
+                    "Deze budgetlijn stond al in de splits. Het bedrag is toegevoegd aan de bestaande split.",
+                    "OK");
+
+            }
+            else
+            {
+                Transaction.TransactionBudgetLines.Add(new TransactionBudgetLine
+                {
+                    BudgetLine = SelectedBudgetLine,
+                    BudgetLineId = SelectedBudgetLine.Id,
+                    AmountAllocated = SplitAmount
+                });
+            }
+
             SelectedBudgetLine = null;
             SplitAmount = 0;
             BudgetLineSearchText = string.Empty;
@@ -109,7 +135,9 @@ namespace AppForLogin.ViewModel
         [RelayCommand]
         private void RemoveSplit(TransactionBudgetLine line)
         {
-            if (line == null) return;
+            if (line == null || Transaction?.TransactionBudgetLines == null)
+                return;
+
             Transaction.TransactionBudgetLines.Remove(line);
         }
         #endregion
@@ -121,26 +149,31 @@ namespace AppForLogin.ViewModel
             if (Transaction is null)
                 return;
 
-            if (Transaction.TransactionBudgetLines.Count > 0 && !SplitsMatchTotal)
+            if (Transaction.TransactionBudgetLines?.Count > 0 && !SplitsMatchTotal)
             {
                 await Shell.Current.DisplayAlertAsync("Split klopt niet",
-                $"Totaal splits ({SplitTotal:0.00}) moet gelijk zijn aan transactie bedrag ({Transaction.Amount:0.00})","OK");
+                    $"Totaal splits ({SplitTotal:0.00}) moet gelijk zijn aan transactie bedrag ({Transaction.Amount:0.00})", "OK");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(Transaction.Description))
+            {
+                await Shell.Current.DisplayAlertAsync("No description", "Er lijkt geen omschrijving te zijn ingevuld. Een transactie is beter terugvindbaar met een omschrijving.", "OK");
                 return;
             }
 
             try
             {
                 IsBusy = true;
-                if (Transaction.Id == 0)
-                {
-                    await _budgetService.AddTransactionAsync(Transaction);
-                }
-                else
-                {
-                    await _budgetService.UpdateTransactionAsync(Transaction);
-                }
 
-                // Navigate back
+                if (Transaction.Id == 0)
+                    await _budgetService.AddTransactionAsync(Transaction);
+                else
+                    await _budgetService.UpdateTransactionAsync(Transaction);
+
+                CopyTransaction(_navigationTransaction, Transaction);
+                _originalTransaction = CloneTransaction(Transaction);
+
                 await Shell.Current.GoToAsync("..");
             }
             catch (Exception ex)
@@ -184,10 +217,12 @@ namespace AppForLogin.ViewModel
             try
             {
                 IsBusy = true;
-                
-                Transaction.Status = StatusTrans.Approved; 
+                Transaction.Status = StatusTrans.Approved;
 
                 await _budgetService.UpdateTransactionAsync(Transaction);
+                CopyTransaction(_navigationTransaction, Transaction);
+                _originalTransaction = CloneTransaction(Transaction);
+
                 await Shell.Current.DisplayAlertAsync("Success", "Transaction approved", "OK");
                 await Shell.Current.GoToAsync("..");
             }
@@ -203,12 +238,75 @@ namespace AppForLogin.ViewModel
 
         [RelayCommand]
         private async Task CancelAsync()
-        { 
+        {
+            if (_originalTransaction != null)
+            {
+                CopyTransaction(_navigationTransaction, _originalTransaction);
+                Transaction = CloneTransaction(_originalTransaction);
+            }
+
+            await Task.CompletedTask;
+        }
+
+        [RelayCommand]
+        private async Task ReturnAsync()
+        {
             await Shell.Current.GoToAsync("..");
         }
         #endregion
-        
-        
 
+        private Transaction CloneTransaction(Transaction source)
+        {
+            if (source == null)
+                return null;
+
+            return new Transaction
+            {
+                Id = source.Id,
+                Date = source.Date,
+                Amount = source.Amount,
+                Description = source.Description,
+                Status = source.Status,
+                IsIncome = source.IsIncome,
+                CategoryId = source.CategoryId,
+                Category = source.Category,
+                TransactionBudgetLines = new ObservableCollection<TransactionBudgetLine>(
+                    (source.TransactionBudgetLines ?? Enumerable.Empty<TransactionBudgetLine>())
+                        .Select(CloneTransactionBudgetLine))
+            };
+        }
+
+        private TransactionBudgetLine CloneTransactionBudgetLine(TransactionBudgetLine source)
+            => new()
+            {
+                
+                TransactionId = source.TransactionId,
+                BudgetLineId = source.BudgetLineId,
+                BudgetLine = source.BudgetLine,
+                AmountAllocated = source.AmountAllocated
+            };
+
+        private void CopyTransaction(Transaction target, Transaction source)
+        {
+            if (target == null || source == null)
+                return;
+
+            target.Id = source.Id;
+            target.Date = source.Date;
+            target.Amount = source.Amount;
+            target.Description = source.Description;
+            target.Status = source.Status;
+            target.IsIncome = source.IsIncome;
+            target.CategoryId = source.CategoryId;
+            target.Category = source.Category;
+
+            if (target.TransactionBudgetLines is null)
+                target.TransactionBudgetLines = new ObservableCollection<TransactionBudgetLine>();
+            else
+                target.TransactionBudgetLines.Clear();
+
+            foreach (var line in source.TransactionBudgetLines ?? Enumerable.Empty<TransactionBudgetLine>())
+                target.TransactionBudgetLines.Add(CloneTransactionBudgetLine(line));
+        }
     }
 }

@@ -3,6 +3,7 @@ using DataAccess.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Text;
 using System.Windows.Input;
 
@@ -22,11 +23,23 @@ namespace AppForLogin.ViewModel.Generic
 
         public ObservableCollection<CategoryViewModel> Children { get; } = new();
 
+        public bool HasChildren => Children.Count > 0;  
+
         public CategoryViewModel(Category category)
         {
             Category = category;
             Level = 0; // Root level for new categories
+           
+            // When children are added/removed, update HasChildren
+            Children.CollectionChanged += OnChildrenCollectionChanged;
         }
+
+        private void OnChildrenCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged(nameof(HasChildren));
+        }
+
+
 
         partial void OnIsExpandedChanged(bool value)
         {
@@ -39,5 +52,6 @@ namespace AppForLogin.ViewModel.Generic
             IsExpanded = !IsExpanded;
         });
 
+        
     }
 }

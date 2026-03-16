@@ -3,20 +3,61 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:model="clr-namespace:DataAccess.Model;assembly=DataAccess"
              x:Class="AppForLogin.Views.CategoriesPage"
-             Title="Budget Dashboard"
+             Title="Category Overview"
              xmlns:converters="clr-namespace:AppForLogin.Converters"
              xmlns:local="clr-namespace:AppForLogin.Views.Generic"
              BackgroundColor="White">
 
-   
-    <CollectionView ItemsSource="{Binding RootCategories}" BackgroundColor="White">
-        <CollectionView.ItemTemplate>
-            <DataTemplate>
-                <local:CategoryTreeView />
-            </DataTemplate>
-        </CollectionView.ItemTemplate>
-    </CollectionView>
+    <Grid RowDefinitions="Auto,*">
+        <!--<Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="2*" />
+        </Grid.ColumnDefinitions>-->
 
+        
+        <!-- Header (Title + Floating Add Button) -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*" Margin="0,8,0,0">
+            <Label Grid.Column="0"
+                   Text="Categories"
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Start"
+                   Margin="16,16,16,0"
+                   TextColor="#6B46C1" />
+
+            <Button Grid.Column="1"
+                    Text="+"
+                    WidthRequest="56"
+                    HeightRequest="56"
+                    CornerRadius="28"
+                    FontSize="24"
+                    BackgroundColor="#6B46C1"
+                    TextColor="White"
+                    Command="{Binding CreateCategoryCommand}"
+                    HorizontalOptions="End"
+                    VerticalOptions="End"
+                    Margin="16" />
+        </Grid>
+
+
+
+        <!-- Tree list -->
+        <CollectionView ItemsSource="{Binding RootCategories}"
+                        BackgroundColor="White"
+                        Grid.Row="1"
+                        Margin="16">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <local:CategoryTreeView />
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+        
+        
+        
+        
+    </Grid>
+    
           
        
 

@@ -28,9 +28,23 @@ public partial class RowGrid : ContentView
     {
         ((RowGrid)bindable).OnPropertyChanged(nameof(HasLeftIcon));
     }
-	
-	// MAIN TEXT
-	public static readonly BindableProperty MainTextProperty = 
+
+    // LEFT ICON BACKGROUND COLOR (badge)
+    public static readonly BindableProperty LeftIconBackgroundColorProperty =
+        BindableProperty.Create(
+            nameof(LeftIconBackgroundColor),
+            typeof(Microsoft.Maui.Graphics.Color),
+            typeof(RowGrid),
+            Microsoft.Maui.Graphics.Colors.DarkSlateBlue);
+
+    public Microsoft.Maui.Graphics.Color LeftIconBackgroundColor
+    {
+        get => (Microsoft.Maui.Graphics.Color)GetValue(LeftIconBackgroundColorProperty);
+        set => SetValue(LeftIconBackgroundColorProperty, value);
+    }
+
+    // MAIN TEXT
+    public static readonly BindableProperty MainTextProperty = 
 		BindableProperty.Create(nameof(MainText), typeof(string), typeof(RowGrid), default(string)); 
 	public string MainText 
 	{ 

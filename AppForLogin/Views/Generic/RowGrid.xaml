@@ -19,15 +19,29 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <!-- LEFT ICON -->
-        <Image Grid.Column="0" 
-               Source="{Binding Source={x:Reference This}, Path=LeftIcon}"
-               WidthRequest="22"
-               HeightRequest="22"
-               Margin="{Binding Source={x:Reference This}, Path=IndentMargin}"
-               HorizontalOptions="Start"
-                VerticalOptions="Center"
-               IsVisible="{Binding Source={x:Reference This}, Path=HasLeftIcon}"/>
+        <!-- LEFT ICON BADGE -->
+        <Border Grid.Column="0"
+        WidthRequest="32"
+        HeightRequest="32"
+        Padding="6"
+        Margin="{Binding Source={x:Reference This}, Path=IndentMargin}"
+        BackgroundColor="{Binding Source={x:Reference This}, Path=LeftIconBackgroundColor}"
+        StrokeThickness="0"
+        HorizontalOptions="Start"
+        VerticalOptions="Center"
+        IsVisible="{Binding Source={x:Reference This}, Path=HasLeftIcon}">
+            <Border.StrokeShape>
+                <!-- afgeronde rechthoek -->
+                <RoundRectangle CornerRadius="10" />
+            </Border.StrokeShape>
+
+            <Image Source="{Binding Source={x:Reference This}, Path=LeftIcon}"
+           WidthRequest="20"
+           HeightRequest="20"
+           HorizontalOptions="Center"
+           VerticalOptions="Center"
+           Aspect="AspectFit" />
+        </Border>
 
         <!-- MAIN TEXT + SUBTEXT links van het midden kolom met 2 rijen-->
         <Grid Grid.Column="1"
