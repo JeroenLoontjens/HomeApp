@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodel="clr-namespace:AppForLogin.ViewModel"
+             x:Class="AppForLogin.Views.CategorieDetailPage"
+             x:DataType="viewmodel:CategoriesDetailViewModel"
+             x:Name="PageRoot"
+             Title="{Binding Name}"
+             BackgroundColor="White">
+
+    <Grid RowDefinitions="Auto,*,Auto" Margin="16">
+
+        <!-- HEADER -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*" Margin="0,8,0,16">
+            <Button Grid.Column="0"
+                    Text="←"
+                    Command="{Binding ReturnCommand}"
+                    BackgroundColor="Transparent"
+                    TextColor="#6B46C1"
+                    FontSize="20"
+                    WidthRequest="44"/>
+            <Label Grid.Column="1"
+                   Text="{Binding Name}"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   TextColor="#6B46C1"
+                   VerticalOptions="Center"/>
+        </Grid>
+
+        <!-- FORM -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="20">
+
+                <!-- PREVIEW BADGE -->
+                <Border WidthRequest="72" HeightRequest="72"
+                        BackgroundColor="{Binding PreviewColor}"
+                        StrokeThickness="0"
+                        HorizontalOptions="Center">
+                    <Border.StrokeShape><RoundRectangle CornerRadius="20"/></Border.StrokeShape>
+                    <Image Source="{Binding Icon}"
+                           WidthRequest="44" HeightRequest="44"
+                           Aspect="AspectFit"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center"/>
+                </Border>
+
+                <!-- NAAM -->
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Naam" FontSize="13" TextColor="Gray"/>
+                    <Border Stroke="#E5E5E5" StrokeThickness="1" Padding="0">
+                        <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+                        <Entry Text="{Binding Name}"
+                               TextColor="Black"
+                               Placeholder="Bijv. Boodschappen"
+                               Margin="8,0"/>
+                    </Border>
+                </VerticalStackLayout>
+
+          
+
+                <!-- ICOON PICKER -->
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Icoon" FontSize="13" TextColor="Gray"/>
+                    <CollectionView ItemsSource="{Binding AvailableIcons}"
+                                    SelectionMode="Single"
+                                    SelectedItem="{Binding Icon, Mode=TwoWay}"
+                                    HeightRequest="220"
+                                    >
+                        <CollectionView.ItemsLayout>
+                            <GridItemsLayout Orientation="Vertical"
+                                             Span="6"
+                                             VerticalItemSpacing="6"
+                                             HorizontalItemSpacing="6"
+                                             
+                                             />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate >
+                            <DataTemplate x:DataType="x:String">
+                                <Border WidthRequest="70" HeightRequest="44"
+                                        Padding="6"
+                                        StrokeThickness="0" 
+                                        BackgroundColor="#6B46C1">
+                                    <Border.StrokeShape><RoundRectangle CornerRadius="10"/></Border.StrokeShape>
+                                    <VisualStateManager.VisualStateGroups>
+                                        <VisualStateGroupList>
+                                            <VisualStateGroup x:Name="CommonStates">
+                                                <VisualState x:Name="Normal">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="BackgroundColor" Value="#6B46C1"/>
+                                                        <Setter Property="Stroke" Value="Transparent"/>
+                                                        <Setter Property="StrokeThickness" Value="0"/>
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                                <VisualState x:Name="Selected">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="BackgroundColor" Value="black"/>
+                                                        <Setter Property="Stroke"          Value="Transparent"/>
+                                                        <Setter Property="StrokeThickness" Value="2"/>
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                            </VisualStateGroup>
+                                        </VisualStateGroupList>
+                                    </VisualStateManager.VisualStateGroups>
+                                    <Image Source="{Binding .}"
+                                           Aspect="AspectFit"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center"/>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+                <!-- KLEUR PICKER -->
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Kleur" FontSize="13" TextColor="Gray"/>
+                    <CollectionView ItemsSource="{Binding AvailableColors}"
+                                    SelectionMode="Single"
+                                    SelectedItem="{Binding ColorHex, Mode=TwoWay}"
+                                    HeightRequest="100">
+                        <CollectionView.ItemsLayout>
+                            <GridItemsLayout Orientation="Vertical"
+                                             Span="6"
+                                             VerticalItemSpacing="8"
+                                             HorizontalItemSpacing="8"/>
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <Border WidthRequest="70" HeightRequest="40"
+                                        BackgroundColor="{Binding ., Converter={StaticResource HexToColorConverter}}"
+                                        StrokeThickness="0">
+                                    <Border.StrokeShape><RoundRectangle CornerRadius="20"/></Border.StrokeShape>
+                                    <VisualStateManager.VisualStateGroups>
+                                        <VisualStateGroupList>
+                                            <VisualStateGroup x:Name="CommonStates">
+                                                <VisualState x:Name="Normal">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="Stroke"          Value="Transparent"/>
+                                                        <Setter Property="StrokeThickness" Value="0"/>
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                                <VisualState x:Name="Selected">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="Stroke"          Value="Black"/>
+                                                        <Setter Property="StrokeThickness" Value="3"/>
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                            </VisualStateGroup>
+                                        </VisualStateGroupList>
+                                    </VisualStateManager.VisualStateGroups>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ACTIONS -->
+        <VerticalStackLayout Grid.Row="2" Spacing="10" Margin="0,16,0,0">
+
+            <Button Text="Opslaan"
+                    Command="{Binding SaveCommand}"
+                    BackgroundColor="#6B46C1"
+                    TextColor="White"
+                    CornerRadius="10"
+                    HeightRequest="48"
+                    IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"/>
+
+            <Button Text="Verwijderen"
+                    Command="{Binding DeleteCommand}"
+                    BackgroundColor="#E53E3E"
+                    TextColor="White"
+                    CornerRadius="10"
+                    HeightRequest="48"
+                    IsVisible="{Binding IsExistingCategory}"
+                    IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"/>
+
+        </VerticalStackLayout>
+
+    </Grid>
+</ContentPage>

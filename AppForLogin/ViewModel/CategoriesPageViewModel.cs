@@ -70,7 +70,28 @@ namespace AppForLogin.ViewModel
             
         }
 
-       
+        [RelayCommand]
+        private async Task OpenCategoryDetail(CategoryViewModel categoryVM)
+        {
+            var category = categoryVM.Category;
+            await Shell.Current.GoToAsync(nameof(CategorieDetailPage), true, new Dictionary<string, object>
+                {
+                    { "Category", category }
+                });
+        }
+
+        [RelayCommand]
+        private async Task CreateCategory()
+        {
+            var category = new Category();
+            await Shell.Current.GoToAsync(nameof(CategorieDetailPage), true, new Dictionary<string, object>
+                {
+                    { "Category", category }
+                });
+
+        }
+
+
 
 
 

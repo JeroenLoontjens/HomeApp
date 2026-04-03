@@ -22,6 +22,7 @@ namespace AppForLogin
             Routing.RegisterRoute(nameof(BudgetPage), typeof(BudgetPage));
             Routing.RegisterRoute(nameof(BudgetTransactionsPage), typeof(BudgetTransactionsPage));
             Routing.RegisterRoute(nameof(CategoriesPage), typeof(CategoriesPage));
+            Routing.RegisterRoute(nameof(CategorieDetailPage), typeof(CategorieDetailPage));    
             Routing.RegisterRoute(nameof(BudgetPlanPage), typeof(BudgetPlanPage));
             Routing.RegisterRoute(nameof(TransactionDetailPage), typeof(TransactionDetailPage));
             Routing.RegisterRoute(nameof(CreateBudgetItemPage), typeof(CreateBudgetItemPage));

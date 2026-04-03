@@ -18,6 +18,7 @@
             <converters:BoolToHeightConverter x:Key="BoolToHeightConverter" />
             <converters:BoolToOpacityConverter x:Key="BoolToOpacityConverter" />
             <converters:InverseBoolConverter x:Key="InverseBoolConverter" />
+            <converters:HexToColorConverter x:Key="HexToColorConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>
