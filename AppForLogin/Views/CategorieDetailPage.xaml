@@ -56,7 +56,21 @@
                     </Border>
                 </VerticalStackLayout>
 
-          
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Ouder categorie" FontSize="13" TextColor="Gray"/>
+                    <Border Stroke="#E5E5E5" StrokeThickness="1" Padding="0">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="8"/>
+                        </Border.StrokeShape>
+                        <Picker ItemsSource="{Binding PossibleParents}"
+                                SelectedItem="{Binding SelectedParent, Mode=TwoWay}"
+                                ItemDisplayBinding="{Binding Name}"
+                                Margin="8,0"
+                                TextColor="Black"/>
+                    </Border>
+                </VerticalStackLayout>
+
+
 
                 <!-- ICOON PICKER -->
                 <VerticalStackLayout Spacing="8">

@@ -19,6 +19,7 @@
             <converters:BoolToOpacityConverter x:Key="BoolToOpacityConverter" />
             <converters:InverseBoolConverter x:Key="InverseBoolConverter" />
             <converters:HexToColorConverter x:Key="HexToColorConverter" />
+            <converters:AmountToColorConverter x:Key="AmountToColorConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

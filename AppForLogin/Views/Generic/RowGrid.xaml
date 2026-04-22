@@ -6,10 +6,10 @@
     x:Name="This">
 
     <Grid 
-          Padding="12"
-          ColumnSpacing="10"
-          RowSpacing="2"
-          Margin="0,0,0,8">
+         Padding="{Binding Source={x:Reference This}, Path=RowPadding}"
+         Margin="{Binding Source={x:Reference This}, Path=RowMargin}"
+         ColumnSpacing="{Binding Source={x:Reference This}, Path=ColumnSpacing}"
+         RowSpacing="{Binding Source={x:Reference This}, Path=RowSpacing}">
        
 
 
@@ -52,12 +52,12 @@
             </Grid.RowDefinitions>
             
             <Label Text="{Binding Source={x:Reference This}, Path=MainText}"
-                   FontSize="16"
+                   FontSize="{Binding Source={x:Reference This}, Path=MainFontSize}"
                    TextColor="Black"
                    Grid.Row="0"/>
 
             <Label Text="{Binding Source={x:Reference This}, Path=SubText}"
-                   FontSize="12"
+                   FontSize="{Binding Source={x:Reference This}, Path=SubFontSize}"
                    Grid.Row="1"
                    TextColor="Gray"
                    IsVisible="True"/>
@@ -66,7 +66,7 @@
         <!-- RIGHT TEXT -->
         <Label Grid.Column="2"
                Text="{Binding Source={x:Reference This}, Path=RightText}"
-               FontSize="16"
+               FontSize="{Binding Source={x:Reference This}, Path=RightFontSize}"
                TextColor="Black"
                HorizontalTextAlignment="End"
                VerticalTextAlignment="Center"

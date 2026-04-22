@@ -7,6 +7,8 @@ using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace AppForLogin.ViewModel
@@ -15,10 +17,18 @@ namespace AppForLogin.ViewModel
     {
         private readonly BudgetService _budgetService;
 
+        [ObservableProperty]
+        public ObservableCollection<Category> possibleParents = new();
+
+        [ObservableProperty]
+        private Category selectedParent;
+
         [ObservableProperty] private Category category;
+
         [ObservableProperty] private string name     = string.Empty;
         [ObservableProperty] private string icon     = string.Empty;
         [ObservableProperty] private string colorHex = string.Empty;
+
         [ObservableProperty] private bool   isBusy;
         
 
@@ -41,12 +51,45 @@ namespace AppForLogin.ViewModel
         public CategoriesDetailViewModel(BudgetService budgetService)
         {
             _budgetService = budgetService;
+             
+
         }
+
+        private async Task LoadPossibleParentsAsync()
+        {
+            var categories = await _budgetService.GetAllCategoriesAsync();
+
+            // Remove self from possible parents
+            var filteredCategories = categories
+                .Where(c => c.Id != Category?.Id && c.ParentCategoryId != Category?.Id)
+                .ToList();
+                    
+                       
+            var DummyItem = new Category { Id = 0, Name = "NO Parent" };
+
+            PossibleParents.Clear();
+            PossibleParents.Add(DummyItem);
+
+            foreach (var category in filteredCategories)
+                PossibleParents.Add(category);
+
+            // 3) Init SelectedParent o.b.v. huidige ParentCategoryId
+            var parentId = Category?.ParentCategoryId;
+
+            if (parentId.HasValue && parentId.Value > 0)
+                SelectedParent = PossibleParents.FirstOrDefault(x => x.Id == parentId.Value) ?? DummyItem;
+            else
+                SelectedParent = DummyItem;
+
+
+        }
+
+
 
         // Re-compute preview whenever the hex value changes
         partial void OnColorHexChanged(string value) => OnPropertyChanged(nameof(PreviewColor));
 
-        public void ApplyQueryAttributes(IDictionary<string, object> query)
+        public async void ApplyQueryAttributes(IDictionary<string, object> query)
         {
             if (query.TryGetValue("Category", out var value) && value is Category c)
             {
@@ -55,6 +98,8 @@ namespace AppForLogin.ViewModel
                 Icon     = c.Icon     ?? string.Empty;
                 ColorHex = c.ColorHex ?? string.Empty;
                 OnPropertyChanged(nameof(IsExistingCategory));
+
+                await LoadPossibleParentsAsync();
             }
         }
 
@@ -81,6 +126,7 @@ namespace AppForLogin.ViewModel
                 Category.Name     = Name.Trim();
                 Category.Icon     = Icon?.Trim();
                 Category.ColorHex = ColorHex?.Trim();
+                Category.ParentCategoryId = (SelectedParent?.Id ?? 0) == 0 ? (int?)null : SelectedParent.Id;
 
                 if (Category.Id == 0)
                     await _budgetService.AddCategoryAsync(Category);

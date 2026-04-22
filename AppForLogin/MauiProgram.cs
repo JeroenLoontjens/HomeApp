@@ -82,7 +82,8 @@ namespace AppForLogin
             builder.Services.AddTransient<BudgetPlanPage>();
             builder.Services.AddTransient<BudgetPage>();
             builder.Services.AddTransient<CreateBudgetItemPage>();
-            
+            builder.Services.AddTransient<BudgetPlanPage>();
+
             // ViewModels
             builder.Services.AddTransient<LoginPageViewModel>();
             builder.Services.AddTransient<UsersAdminViewModel>();
@@ -91,6 +92,7 @@ namespace AppForLogin
             builder.Services.AddTransient<TransactionDetailViewModel>();
             builder.Services.AddTransient<CreateBudgetItemViewModel>();
             builder.Services.AddTransient<CategoriesDetailViewModel>();
+            builder.Services.AddTransient<BudgetPlanPageViewModel>();
 
             //Services
             // Register UserService with a configured HttpClient without requiring AddHttpClient

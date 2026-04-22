@@ -1,12 +1,194 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:AppForLogin.Converters"
+             xmlns:viewmodel="clr-namespace:AppForLogin.ViewModel"
+             xmlns:generic="clr-namespace:AppForLogin.Views.Generic"
+             xmlns:model="clr-namespace:DataAccess.Model;assembly=DataAccess"
              x:Class="AppForLogin.Views.BudgetPlanPage"
-             Title="BudgetPlanPage">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+             x:DataType="viewmodel:BudgetPlanPageViewModel"
+             Title="Plan"
+             BackgroundColor="White">
+
+    <Grid RowDefinitions="Auto,Auto,*" Padding="16">
+
+        <!-- Controls -->
+        <HorizontalStackLayout Spacing="10">
+            <Picker Title="Jaar"
+                    ItemsSource="{Binding AvailableYears}"
+                    SelectedItem="{Binding SelectedYear}"
+                    TextColor="Black"
+                    WidthRequest="110"/>
+
+            <Button Text="Ververs"
+                    Command="{Binding LoadCommand}"
+                    IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"/>
+        </HorizontalStackLayout>
+
+        <!-- Year totals -->
+        <Border Grid.Row="1" Stroke="#E5E5E5" StrokeThickness="1" Padding="12" Margin="0,12,0,0" BackgroundColor="AliceBlue">
+            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto">
+                <Label Grid.Row="0" Grid.ColumnSpan="2"
+                       Text="{Binding SelectedYear, StringFormat='Jaaroverzicht: {0}'}"
+                       TextColor="Black"
+                       FontAttributes="Bold"/>
+
+                <Label Grid.Row="1" Grid.Column="0" Text="Inkomsten" TextColor="Gray"/>
+                <Label Grid.Row="1" Grid.Column="1" Text="{Binding TotalIncome, StringFormat='€ {0:N2}'}" TextColor="Black"/>
+
+                <Label Grid.Row="2" Grid.Column="0" Text="Uitgaven" TextColor="Gray"/>
+                <Label Grid.Row="2" Grid.Column="1" Text="{Binding TotalExpense, StringFormat='€ {0:N2}'}" TextColor="Black"/>
+
+                <Label Grid.Row="3" Grid.Column="0" Text="Netto" TextColor="Gray"/>
+                <Label Grid.Row="3" Grid.Column="1"
+                       Text="{Binding TotalNet, StringFormat='€ {0:N2}'}"
+                       TextColor="{Binding TotalNet, Converter={StaticResource AmountToColorConverter}}"
+                       FontAttributes="Bold"/>
+            </Grid>
+        </Border>
+
+        <!-- VERTICAL MODE -->
+        <CollectionView Grid.Row="2"
+                        ItemsSource="{Binding MonthGroups}"
+                        Margin="0,12,0,0">
+            <CollectionView.Triggers>
+                <DataTrigger TargetType="CollectionView" Binding="{Binding LayoutMode}" Value="Horizontal">
+                    <Setter Property="IsVisible" Value="False"/>
+                </DataTrigger>
+            </CollectionView.Triggers>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="viewmodel:MonthlyBudgetGroup">
+                    <Border Stroke="#E5E5E5" StrokeThickness="1" Padding="12" Margin="0,0,0,10">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="{Binding MonthLabelLong}" TextColor="White" FontAttributes="Bold" BackgroundColor="Purple" HorizontalTextAlignment="Center"/>
+
+                            <generic:RowGrid MainText="Inkomsten"
+                                             RightText="{Binding Income, StringFormat='€ {0:N2}'}" RowSpacing="0" RowPadding="0" RowMargin="0" />
+
+                            <generic:RowGrid MainText="Uitgaven"
+                                             RightText="{Binding Expense, StringFormat='€ {0:N2}'}" RowSpacing="0" RowPadding="0" RowMargin="0" />
+
+                            <!-- Netto: aparte regel zodat kleur kan -->
+                            <Grid ColumnDefinitions="*,Auto" Padding="6,0,6,0">
+                                <Label Text="Netto" TextColor="Black" FontAttributes="Bold" FontSize="16" BackgroundColor="LightGray"/>
+                                <Label Grid.Column="1"
+                                       Text="{Binding Net, StringFormat='€ {0:N2}'}"
+                                       TextColor="{Binding Net, Converter={StaticResource AmountToColorConverter}}"
+                                       FontAttributes="Bold"
+                                       FontSize="16" BackgroundColor="LightGray"/>
+                            </Grid>
+
+                            <!-- Budgetlines van die maand (bedrag gewoon zwart) -->
+                            <CollectionView ItemsSource="{Binding Lines}" SelectionMode="None">
+                                <CollectionView.EmptyView>
+                                    <Label Text="Geen budgetlijnen" TextColor="Gray" Margin="0,6,0,0"/>
+                                </CollectionView.EmptyView>
+
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="model:BudgetLine">
+                                        <generic:RowGrid MainText="{Binding Category.Name}"
+                                                         SubText="{Binding IsIncome, StringFormat='Income: {0}'}"
+                                                         RightText="{Binding PlannedAmount, StringFormat='€ {0:N2}'}" 
+                                                         MainFontSize="13"
+                                                         SubFontSize="10"
+                                                         RightFontSize="13" Background="AliceBlue"
+                                                         RowPadding="6,4"
+                                                         RowMargin="0,0,0,2"
+                                                         RowSpacing="0"
+                                                         ColumnSpacing="6"/>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- HORIZONTAL MODE placeholder: zie hieronder -->
+        <!-- (we vullen dit in zodra je bevestigt dat je alleen totals horizontaal wil) -->
+        <!-- HORIZONTAL MODE -->
+        <ScrollView Grid.Row="2" Orientation="Horizontal" Margin="0,12,0,0">
+            <ScrollView.Triggers>
+                <DataTrigger TargetType="ScrollView" Binding="{Binding LayoutMode}" Value="Vertical">
+                    <Setter Property="IsVisible" Value="False"/>
+                </DataTrigger>
+            </ScrollView.Triggers>
+
+            <HorizontalStackLayout Spacing="10">
+
+                <CollectionView ItemsSource="{Binding MonthGroups}"
+                    ItemsLayout="HorizontalList"
+                    SelectionMode="None">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="viewmodel:MonthlyBudgetGroup">
+                            <Border Stroke="#E5E5E5" StrokeThickness="1" Padding="12" WidthRequest="220" BackgroundColor="GhostWhite">
+                                <VerticalStackLayout Spacing="8">
+
+                                    <!-- Clickable totals area -->
+                                    <Grid>
+                                        <Grid.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ToggleMonthCommand}"
+                                        CommandParameter="{Binding .}" />
+                                        </Grid.GestureRecognizers>
+
+                                        <VerticalStackLayout Spacing="6">
+                                            <Label Text="{Binding MonthLabel}" FontAttributes="Bold" TextColor="Black"/>
+
+                                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
+                                                <Label Grid.Row="0" Text="In" TextColor="Gray"/>
+                                                <Label Grid.Row="0" Grid.Column="1" Text="{Binding Income, StringFormat='€ {0:N2}'}" TextColor="Black"/>
+
+                                                <Label Grid.Row="1" Text="Uit" TextColor="Gray"/>
+                                                <Label Grid.Row="1" Grid.Column="1" Text="{Binding Expense, StringFormat='€ {0:N2}'}" TextColor="Black"/>
+
+                                                <Label Grid.Row="2" Text="Netto" TextColor="Gray"/>
+                                                <Label Grid.Row="2" Grid.Column="1"
+                           Text="{Binding Net, StringFormat='€ {0:N2}'}"
+                           TextColor="{Binding Net, Converter={StaticResource AmountToColorConverter}}"
+                           FontAttributes="Bold"/>
+                                            </Grid>
+
+                                            <Label Text="Tik voor details"
+                         FontSize="11"
+                         TextColor="Gray"/>
+                                        </VerticalStackLayout>
+                                    </Grid>
+
+                                    <!-- Details: budgetlines zichtbaar na klik -->
+                                    <CollectionView ItemsSource="{Binding Lines}"
+                              IsVisible="{Binding IsExpanded}"
+                              SelectionMode="None" Margin="0" >
+                                        <CollectionView.EmptyView>
+                                            <Label Text="Geen budgetlijnen" TextColor="Gray" FontSize="12"/>
+                                        </CollectionView.EmptyView>
+
+                                        <CollectionView.ItemTemplate >
+                                            <DataTemplate x:DataType="model:BudgetLine">
+                                                <generic:RowGrid MainText="{Binding Category.Name}" 
+                                                                 SubText="{Binding IsIncome, StringFormat='Income: {0}'}" 
+                                                                 RightText="{Binding PlannedAmount, StringFormat='€ {0:N2}'}"
+                                                                 MainFontSize="13"
+                                                                 SubFontSize="10"
+                                                                 RightFontSize="13" Background="AliceBlue" 
+                                                                 RowPadding="6,4"
+                                                                 RowMargin="0,0,0,2"
+                                                                 RowSpacing="0"
+                                                                 ColumnSpacing="6"
+                                                                 />
+                                            </DataTemplate>
+                                        </CollectionView.ItemTemplate>
+                                    </CollectionView>
+
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </HorizontalStackLayout>
+        </ScrollView>
+
+    </Grid>
 </ContentPage>
