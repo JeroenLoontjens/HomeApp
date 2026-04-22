@@ -26,7 +26,7 @@ namespace AppForLogin
             Routing.RegisterRoute(nameof(BudgetPlanPage), typeof(BudgetPlanPage));
             Routing.RegisterRoute(nameof(TransactionDetailPage), typeof(TransactionDetailPage));
             Routing.RegisterRoute(nameof(CreateBudgetItemPage), typeof(CreateBudgetItemPage));
-            Routing.RegisterRoute(nameof(BudgetPlanPage), typeof(BudgetPlanPage));
+            Routing.RegisterRoute(nameof(BudgetLineDetailPage), typeof(BudgetLineDetailPage));
 
 
             // ensure LoginPage route exists so Shell navigation can target it

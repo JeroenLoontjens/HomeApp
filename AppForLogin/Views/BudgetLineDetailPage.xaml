@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodel="clr-namespace:AppForLogin.ViewModel"
+             x:Class="AppForLogin.Views.BudgetLineDetailPage"
+             x:DataType="viewmodel:BudgetLineDetailViewModel"
+             Title="Budgetlijn detail"
+             BackgroundColor="White">
+
+    <Grid RowDefinitions="Auto,*,Auto" Margin="16">
+
+        <!-- HEADER -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*" Margin="0,8,0,16">
+            <Button Grid.Column="0"
+                    Text="←"
+                    Command="{Binding ReturnCommand}"
+                    BackgroundColor="Transparent"
+                    TextColor="#6B46C1"
+                    FontSize="20"
+                    WidthRequest="44"/>
+            <Label Grid.Column="1"
+                   Text="{Binding CategoryName}"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   TextColor="#6B46C1"
+                   VerticalOptions="Center"/>
+        </Grid>
+
+        <!-- FORM -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="16">
+
+                <!-- Categorie (readonly) -->
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Categorie" FontSize="13" TextColor="Gray"/>
+                    <Border Stroke="#E5E5E5" StrokeThickness="1" Padding="12">
+                        <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+                        <Label Text="{Binding CategoryName}" TextColor="Black"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Periode -->
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Periode" FontSize="13" TextColor="Gray"/>
+                    <Border Stroke="#E5E5E5" StrokeThickness="1" Padding="4">
+                        <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+                        <DatePicker Date="{Binding Period, Mode=TwoWay}"
+                                    TextColor="Black"
+                                    BackgroundColor="Transparent"
+                                    Format="MMMM yyyy"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Gepland bedrag -->
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Gepland bedrag" FontSize="13" TextColor="Gray"/>
+                    <Border Stroke="#E5E5E5" StrokeThickness="1" Padding="0">
+                        <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+                        <Entry Text="{Binding PlannedAmount, Mode=TwoWay}"
+                               Keyboard="Numeric"
+                               TextColor="Black"
+                               BackgroundColor="AliceBlue"
+                               Placeholder="Bedrag"
+                               Margin="8,0"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Is Inkomsten -->
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Inkomsten?" FontSize="13" TextColor="Gray"/>
+                    <Switch IsToggled="{Binding IsIncome, Mode=TwoWay}"
+                            OnColor="Green"
+                            OffColor="LightGray"/>
+                </VerticalStackLayout>
+
+                <!-- Notities -->
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Notities" FontSize="13" TextColor="Gray"/>
+                    <Border Stroke="#E5E5E5" StrokeThickness="1" Padding="0">
+                        <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+                        <Editor Text="{Binding Notes, Mode=TwoWay}"
+                                TextColor="Black"
+                                BackgroundColor="AliceBlue"
+                                Placeholder="Optionele notities"
+                                AutoSize="TextChanges"
+                                MinimumHeightRequest="80"
+                                Margin="8,4"/>
+                    </Border>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ACTIONS -->
+        <VerticalStackLayout Grid.Row="2" Spacing="10" Margin="0,16,0,0">
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"/>
+            <Button Text="Opslaan"
+                    Command="{Binding SaveCommand}"
+                    BackgroundColor="#6B46C1"
+                    TextColor="White"
+                    CornerRadius="10"
+                    HeightRequest="48"
+                    IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"/>
+        </VerticalStackLayout>
+
+    </Grid>
+</ContentPage>

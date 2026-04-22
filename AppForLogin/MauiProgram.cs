@@ -82,7 +82,7 @@ namespace AppForLogin
             builder.Services.AddTransient<BudgetPlanPage>();
             builder.Services.AddTransient<BudgetPage>();
             builder.Services.AddTransient<CreateBudgetItemPage>();
-            builder.Services.AddTransient<BudgetPlanPage>();
+            builder.Services.AddTransient<BudgetLineDetailPage>();
 
             // ViewModels
             builder.Services.AddTransient<LoginPageViewModel>();
@@ -92,6 +92,7 @@ namespace AppForLogin
             builder.Services.AddTransient<TransactionDetailViewModel>();
             builder.Services.AddTransient<CreateBudgetItemViewModel>();
             builder.Services.AddTransient<CategoriesDetailViewModel>();
+            builder.Services.AddTransient<BudgetLineDetailViewModel>();
             builder.Services.AddTransient<BudgetPlanPageViewModel>();
 
             //Services

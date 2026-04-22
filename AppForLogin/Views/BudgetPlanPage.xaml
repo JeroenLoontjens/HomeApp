@@ -10,20 +10,36 @@
              Title="Plan"
              BackgroundColor="White">
 
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="+"
+                     Command="{Binding NavigateToCreateBudgetItemCommand}"
+                     Order="Primary"
+                     Priority="0"/>
+    </ContentPage.ToolbarItems>
+
     <Grid RowDefinitions="Auto,Auto,*" Padding="16">
 
         <!-- Controls -->
-        <HorizontalStackLayout Spacing="10">
+        <FlexLayout Wrap="Wrap" AlignItems="Center" JustifyContent="Start">
             <Picker Title="Jaar"
                     ItemsSource="{Binding AvailableYears}"
                     SelectedItem="{Binding SelectedYear}"
                     TextColor="Black"
-                    WidthRequest="110"/>
+                    WidthRequest="100"
+                    Margin="0,0,8,0"/>
+
+            <Picker Title="Categorie"
+                    ItemsSource="{Binding Categories}"
+                    ItemDisplayBinding="{Binding Name}"
+                    SelectedItem="{Binding SelectedCategoryFilter, Mode=TwoWay}"
+                    TextColor="Black"
+                    WidthRequest="160"
+                    Margin="0,0,8,0"/>
 
             <Button Text="Ververs"
                     Command="{Binding LoadCommand}"
                     IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"/>
-        </HorizontalStackLayout>
+        </FlexLayout>
 
         <!-- Year totals -->
         <Border Grid.Row="1" Stroke="#E5E5E5" StrokeThickness="1" Padding="12" Margin="0,12,0,0" BackgroundColor="AliceBlue">
@@ -33,17 +49,17 @@
                        TextColor="Black"
                        FontAttributes="Bold"/>
 
-                <Label Grid.Row="1" Grid.Column="0" Text="Inkomsten" TextColor="Gray"/>
-                <Label Grid.Row="1" Grid.Column="1" Text="{Binding TotalIncome, StringFormat='€ {0:N2}'}" TextColor="Black"/>
-
-                <Label Grid.Row="2" Grid.Column="0" Text="Uitgaven" TextColor="Gray"/>
-                <Label Grid.Row="2" Grid.Column="1" Text="{Binding TotalExpense, StringFormat='€ {0:N2}'}" TextColor="Black"/>
-
-                <Label Grid.Row="3" Grid.Column="0" Text="Netto" TextColor="Gray"/>
-                <Label Grid.Row="3" Grid.Column="1"
+                <Label Grid.Row="1" Grid.Column="0" Text="Netto" TextColor="Black" FontAttributes="Bold"/>
+                <Label Grid.Row="1" Grid.Column="1"
                        Text="{Binding TotalNet, StringFormat='€ {0:N2}'}"
                        TextColor="{Binding TotalNet, Converter={StaticResource AmountToColorConverter}}"
                        FontAttributes="Bold"/>
+
+                <Label Grid.Row="2" Grid.Column="0" Text="Inkomsten" TextColor="Gray"/>
+                <Label Grid.Row="2" Grid.Column="1" Text="{Binding TotalIncome, StringFormat='€ {0:N2}'}" TextColor="Black"/>
+
+                <Label Grid.Row="3" Grid.Column="0" Text="Uitgaven" TextColor="Gray"/>
+                <Label Grid.Row="3" Grid.Column="1" Text="{Binding TotalExpense, StringFormat='€ {0:N2}'}" TextColor="Black"/>
             </Grid>
         </Border>
 
@@ -63,40 +79,102 @@
                         <VerticalStackLayout Spacing="6">
                             <Label Text="{Binding MonthLabelLong}" TextColor="White" FontAttributes="Bold" BackgroundColor="Purple" HorizontalTextAlignment="Center"/>
 
-                            <generic:RowGrid MainText="Inkomsten"
-                                             RightText="{Binding Income, StringFormat='€ {0:N2}'}" RowSpacing="0" RowPadding="0" RowMargin="0" />
-
-                            <generic:RowGrid MainText="Uitgaven"
-                                             RightText="{Binding Expense, StringFormat='€ {0:N2}'}" RowSpacing="0" RowPadding="0" RowMargin="0" />
-
-                            <!-- Netto: aparte regel zodat kleur kan -->
-                            <Grid ColumnDefinitions="*,Auto" Padding="6,0,6,0">
-                                <Label Text="Netto" TextColor="Black" FontAttributes="Bold" FontSize="16" BackgroundColor="LightGray"/>
+                            <!-- Netto (first) -->
+                            <Grid ColumnDefinitions="*,Auto" Padding="6,0,6,0" BackgroundColor="LightGray">
+                                <Label Text="Netto" TextColor="Black" FontAttributes="Bold" FontSize="16"/>
                                 <Label Grid.Column="1"
                                        Text="{Binding Net, StringFormat='€ {0:N2}'}"
                                        TextColor="{Binding Net, Converter={StaticResource AmountToColorConverter}}"
                                        FontAttributes="Bold"
-                                       FontSize="16" BackgroundColor="LightGray"/>
+                                       FontSize="16"/>
                             </Grid>
 
-                            <!-- Budgetlines van die maand (bedrag gewoon zwart) -->
-                            <CollectionView ItemsSource="{Binding Lines}" SelectionMode="None">
+                            <!-- Inkomsten (tappable filter) -->
+                            <Grid ColumnDefinitions="*,Auto" Padding="6,2,6,2">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding FilterIncomeCommand}"/>
+                                </Grid.GestureRecognizers>
+                                <Grid.Triggers>
+                                    <DataTrigger TargetType="Grid" Binding="{Binding IsIncomeFilterActive}" Value="True">
+                                        <Setter Property="BackgroundColor" Value="#C8E6C9"/>
+                                    </DataTrigger>
+                                </Grid.Triggers>
+                                <Label TextColor="Gray">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding IsIncomeFilterActive}" Value="True">
+                                            <Setter Property="FontAttributes" Value="Bold"/>
+                                            <Setter Property="TextColor" Value="#2E7D32"/>
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="Inkomsten"/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                                <Label Grid.Column="1"
+                                       Text="{Binding Income, StringFormat='€ {0:N2}'}"
+                                       TextColor="Black"/>
+                            </Grid>
+
+                            <!-- Uitgaven (tappable filter) -->
+                            <Grid ColumnDefinitions="*,Auto" Padding="6,2,6,2">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding FilterExpenseCommand}"/>
+                                </Grid.GestureRecognizers>
+                                <Grid.Triggers>
+                                    <DataTrigger TargetType="Grid" Binding="{Binding IsExpenseFilterActive}" Value="True">
+                                        <Setter Property="BackgroundColor" Value="#FFCDD2"/>
+                                    </DataTrigger>
+                                </Grid.Triggers>
+                                <Label TextColor="Gray">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding IsExpenseFilterActive}" Value="True">
+                                            <Setter Property="FontAttributes" Value="Bold"/>
+                                            <Setter Property="TextColor" Value="#C62828"/>
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="Uitgaven"/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                                <Label Grid.Column="1"
+                                       Text="{Binding Expense, StringFormat='€ {0:N2}'}"
+                                       TextColor="Black"/>
+                            </Grid>
+
+                            <!-- Hint when no filter active -->
+                            <Label Text="Tik op Inkomsten of Uitgaven om budgetlijnen te zien"
+                                   FontSize="11"
+                                   TextColor="Gray"
+                                   Margin="6,0"
+                                   IsVisible="{Binding HasActiveFilter, Converter={StaticResource InverseBoolConverter}}"/>
+
+                            <!-- Budgetlines filtered -->
+                            <CollectionView ItemsSource="{Binding DisplayedLines}"
+                                            SelectionMode="None"
+                                            IsVisible="{Binding HasActiveFilter}">
                                 <CollectionView.EmptyView>
-                                    <Label Text="Geen budgetlijnen" TextColor="Gray" Margin="0,6,0,0"/>
+                                    <Label Text="Geen budgetlijnen" TextColor="Gray" Margin="6,0"/>
                                 </CollectionView.EmptyView>
 
                                 <CollectionView.ItemTemplate>
                                     <DataTemplate x:DataType="model:BudgetLine">
                                         <generic:RowGrid MainText="{Binding Category.Name}"
-                                                         SubText="{Binding IsIncome, StringFormat='Income: {0}'}"
-                                                         RightText="{Binding PlannedAmount, StringFormat='€ {0:N2}'}" 
+                                                         SubText="{Binding Notes}"
+                                                         RightText="{Binding PlannedAmount, StringFormat='€ {0:N2}'}"
                                                          MainFontSize="13"
                                                          SubFontSize="10"
-                                                         RightFontSize="13" Background="AliceBlue"
+                                                         RightFontSize="13"
+                                                         Background="AliceBlue"
                                                          RowPadding="6,4"
                                                          RowMargin="0,0,0,2"
                                                          RowSpacing="0"
-                                                         ColumnSpacing="6"/>
+                                                         ColumnSpacing="6"
+                                                         Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.NavigateToBudgetLineDetailCommand}"
+                                                         CommandParameter="{Binding .}"/>
                                     </DataTemplate>
                                 </CollectionView.ItemTemplate>
                             </CollectionView>
@@ -106,8 +184,6 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <!-- HORIZONTAL MODE placeholder: zie hieronder -->
-        <!-- (we vullen dit in zodra je bevestigt dat je alleen totals horizontaal wil) -->
         <!-- HORIZONTAL MODE -->
         <ScrollView Grid.Row="2" Orientation="Horizontal" Margin="0,12,0,0">
             <ScrollView.Triggers>
@@ -126,57 +202,88 @@
                             <Border Stroke="#E5E5E5" StrokeThickness="1" Padding="12" WidthRequest="220" BackgroundColor="GhostWhite">
                                 <VerticalStackLayout Spacing="8">
 
-                                    <!-- Clickable totals area -->
-                                    <Grid>
-                                        <Grid.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ToggleMonthCommand}"
-                                        CommandParameter="{Binding .}" />
-                                        </Grid.GestureRecognizers>
+                                    <Label Text="{Binding MonthLabel}" FontAttributes="Bold" TextColor="Black"/>
 
-                                        <VerticalStackLayout Spacing="6">
-                                            <Label Text="{Binding MonthLabel}" FontAttributes="Bold" TextColor="Black"/>
-
-                                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
-                                                <Label Grid.Row="0" Text="In" TextColor="Gray"/>
-                                                <Label Grid.Row="0" Grid.Column="1" Text="{Binding Income, StringFormat='€ {0:N2}'}" TextColor="Black"/>
-
-                                                <Label Grid.Row="1" Text="Uit" TextColor="Gray"/>
-                                                <Label Grid.Row="1" Grid.Column="1" Text="{Binding Expense, StringFormat='€ {0:N2}'}" TextColor="Black"/>
-
-                                                <Label Grid.Row="2" Text="Netto" TextColor="Gray"/>
-                                                <Label Grid.Row="2" Grid.Column="1"
-                           Text="{Binding Net, StringFormat='€ {0:N2}'}"
-                           TextColor="{Binding Net, Converter={StaticResource AmountToColorConverter}}"
-                           FontAttributes="Bold"/>
-                                            </Grid>
-
-                                            <Label Text="Tik voor details"
-                         FontSize="11"
-                         TextColor="Gray"/>
-                                        </VerticalStackLayout>
+                                    <!-- Netto (first) -->
+                                    <Grid ColumnDefinitions="*,Auto" BackgroundColor="LightGray" Padding="4,2">
+                                        <Label Text="Netto" TextColor="Black" FontAttributes="Bold"/>
+                                        <Label Grid.Column="1"
+                                               Text="{Binding Net, StringFormat='€ {0:N2}'}"
+                                               TextColor="{Binding Net, Converter={StaticResource AmountToColorConverter}}"
+                                               FontAttributes="Bold"/>
                                     </Grid>
 
-                                    <!-- Details: budgetlines zichtbaar na klik -->
-                                    <CollectionView ItemsSource="{Binding Lines}"
-                              IsVisible="{Binding IsExpanded}"
-                              SelectionMode="None" Margin="0" >
+                                    <!-- Inkomsten (tappable filter) -->
+                                    <Grid ColumnDefinitions="*,Auto" Padding="4,2">
+                                        <Grid.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding FilterIncomeCommand}"/>
+                                        </Grid.GestureRecognizers>
+                                        <Grid.Triggers>
+                                            <DataTrigger TargetType="Grid" Binding="{Binding IsIncomeFilterActive}" Value="True">
+                                                <Setter Property="BackgroundColor" Value="#C8E6C9"/>
+                                            </DataTrigger>
+                                        </Grid.Triggers>
+                                        <Label Text="In" TextColor="Gray">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" Binding="{Binding IsIncomeFilterActive}" Value="True">
+                                                    <Setter Property="FontAttributes" Value="Bold"/>
+                                                    <Setter Property="TextColor" Value="#2E7D32"/>
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+                                        <Label Grid.Column="1" Text="{Binding Income, StringFormat='€ {0:N2}'}" TextColor="Black"/>
+                                    </Grid>
+
+                                    <!-- Uitgaven (tappable filter) -->
+                                    <Grid ColumnDefinitions="*,Auto" Padding="4,2">
+                                        <Grid.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding FilterExpenseCommand}"/>
+                                        </Grid.GestureRecognizers>
+                                        <Grid.Triggers>
+                                            <DataTrigger TargetType="Grid" Binding="{Binding IsExpenseFilterActive}" Value="True">
+                                                <Setter Property="BackgroundColor" Value="#FFCDD2"/>
+                                            </DataTrigger>
+                                        </Grid.Triggers>
+                                        <Label Text="Uit" TextColor="Gray">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" Binding="{Binding IsExpenseFilterActive}" Value="True">
+                                                    <Setter Property="FontAttributes" Value="Bold"/>
+                                                    <Setter Property="TextColor" Value="#C62828"/>
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+                                        <Label Grid.Column="1" Text="{Binding Expense, StringFormat='€ {0:N2}'}" TextColor="Black"/>
+                                    </Grid>
+
+                                    <!-- Hint when no filter active -->
+                                    <Label Text="Tik op In/Uit om te filteren"
+                                           FontSize="10"
+                                           TextColor="Gray"
+                                           IsVisible="{Binding HasActiveFilter, Converter={StaticResource InverseBoolConverter}}"/>
+
+                                    <!-- Budget lines (filtered) -->
+                                    <CollectionView ItemsSource="{Binding DisplayedLines}"
+                                                    SelectionMode="None"
+                                                    IsVisible="{Binding HasActiveFilter}">
                                         <CollectionView.EmptyView>
                                             <Label Text="Geen budgetlijnen" TextColor="Gray" FontSize="12"/>
                                         </CollectionView.EmptyView>
 
-                                        <CollectionView.ItemTemplate >
+                                        <CollectionView.ItemTemplate>
                                             <DataTemplate x:DataType="model:BudgetLine">
-                                                <generic:RowGrid MainText="{Binding Category.Name}" 
-                                                                 SubText="{Binding IsIncome, StringFormat='Income: {0}'}" 
+                                                <generic:RowGrid MainText="{Binding Category.Name}"
+                                                                 SubText="{Binding Notes}"
                                                                  RightText="{Binding PlannedAmount, StringFormat='€ {0:N2}'}"
                                                                  MainFontSize="13"
                                                                  SubFontSize="10"
-                                                                 RightFontSize="13" Background="AliceBlue" 
+                                                                 RightFontSize="13"
+                                                                 Background="AliceBlue"
                                                                  RowPadding="6,4"
                                                                  RowMargin="0,0,0,2"
                                                                  RowSpacing="0"
                                                                  ColumnSpacing="6"
-                                                                 />
+                                                                 Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.NavigateToBudgetLineDetailCommand}"
+                                                                 CommandParameter="{Binding .}"/>
                                             </DataTemplate>
                                         </CollectionView.ItemTemplate>
                                     </CollectionView>
