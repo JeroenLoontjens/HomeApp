@@ -28,13 +28,22 @@
                     WidthRequest="100"
                     Margin="0,0,8,0"/>
 
-            <Picker Title="Categorie"
-                    ItemsSource="{Binding Categories}"
+            <Picker Title="Hoofdcategorie"
+                    ItemsSource="{Binding RootCategories}"
                     ItemDisplayBinding="{Binding Name}"
-                    SelectedItem="{Binding SelectedCategoryFilter, Mode=TwoWay}"
+                    SelectedItem="{Binding SelectedRootCategory, Mode=TwoWay}"
                     TextColor="Black"
                     WidthRequest="160"
                     Margin="0,0,8,0"/>
+
+            <Picker Title="Subcategorie"
+                    ItemsSource="{Binding SubCategories}"
+                    ItemDisplayBinding="{Binding Name}"
+                    SelectedItem="{Binding SelectedSubCategory, Mode=TwoWay}"
+                    TextColor="Black"
+                    WidthRequest="160"
+                    Margin="0,0,8,0"
+                    IsVisible="{Binding HasSubCategories}"/>
 
             <Button Text="Ververs"
                     Command="{Binding LoadCommand}"
@@ -95,13 +104,13 @@
                                     <TapGestureRecognizer Command="{Binding FilterIncomeCommand}"/>
                                 </Grid.GestureRecognizers>
                                 <Grid.Triggers>
-                                    <DataTrigger TargetType="Grid" Binding="{Binding IsIncomeFilterActive}" Value="True">
+                                    <DataTrigger TargetType="Grid" Binding="{Binding ShowIncome}" Value="True">
                                         <Setter Property="BackgroundColor" Value="#C8E6C9"/>
                                     </DataTrigger>
                                 </Grid.Triggers>
                                 <Label TextColor="Gray">
                                     <Label.Triggers>
-                                        <DataTrigger TargetType="Label" Binding="{Binding IsIncomeFilterActive}" Value="True">
+                                        <DataTrigger TargetType="Label" Binding="{Binding ShowIncome}" Value="True">
                                             <Setter Property="FontAttributes" Value="Bold"/>
                                             <Setter Property="TextColor" Value="#2E7D32"/>
                                         </DataTrigger>
@@ -123,13 +132,13 @@
                                     <TapGestureRecognizer Command="{Binding FilterExpenseCommand}"/>
                                 </Grid.GestureRecognizers>
                                 <Grid.Triggers>
-                                    <DataTrigger TargetType="Grid" Binding="{Binding IsExpenseFilterActive}" Value="True">
+                                    <DataTrigger TargetType="Grid" Binding="{Binding ShowExpense}" Value="True">
                                         <Setter Property="BackgroundColor" Value="#FFCDD2"/>
                                     </DataTrigger>
                                 </Grid.Triggers>
                                 <Label TextColor="Gray">
                                     <Label.Triggers>
-                                        <DataTrigger TargetType="Label" Binding="{Binding IsExpenseFilterActive}" Value="True">
+                                        <DataTrigger TargetType="Label" Binding="{Binding ShowExpense}" Value="True">
                                             <Setter Property="FontAttributes" Value="Bold"/>
                                             <Setter Property="TextColor" Value="#C62828"/>
                                         </DataTrigger>
@@ -219,13 +228,13 @@
                                             <TapGestureRecognizer Command="{Binding FilterIncomeCommand}"/>
                                         </Grid.GestureRecognizers>
                                         <Grid.Triggers>
-                                            <DataTrigger TargetType="Grid" Binding="{Binding IsIncomeFilterActive}" Value="True">
+                                            <DataTrigger TargetType="Grid" Binding="{Binding ShowIncome}" Value="True">
                                                 <Setter Property="BackgroundColor" Value="#C8E6C9"/>
                                             </DataTrigger>
                                         </Grid.Triggers>
                                         <Label Text="In" TextColor="Gray">
                                             <Label.Triggers>
-                                                <DataTrigger TargetType="Label" Binding="{Binding IsIncomeFilterActive}" Value="True">
+                                                <DataTrigger TargetType="Label" Binding="{Binding ShowIncome}" Value="True">
                                                     <Setter Property="FontAttributes" Value="Bold"/>
                                                     <Setter Property="TextColor" Value="#2E7D32"/>
                                                 </DataTrigger>
@@ -240,13 +249,13 @@
                                             <TapGestureRecognizer Command="{Binding FilterExpenseCommand}"/>
                                         </Grid.GestureRecognizers>
                                         <Grid.Triggers>
-                                            <DataTrigger TargetType="Grid" Binding="{Binding IsExpenseFilterActive}" Value="True">
+                                            <DataTrigger TargetType="Grid" Binding="{Binding ShowExpense}" Value="True">
                                                 <Setter Property="BackgroundColor" Value="#FFCDD2"/>
                                             </DataTrigger>
                                         </Grid.Triggers>
                                         <Label Text="Uit" TextColor="Gray">
                                             <Label.Triggers>
-                                                <DataTrigger TargetType="Label" Binding="{Binding IsExpenseFilterActive}" Value="True">
+                                                <DataTrigger TargetType="Label" Binding="{Binding ShowExpense}" Value="True">
                                                     <Setter Property="FontAttributes" Value="Bold"/>
                                                     <Setter Property="TextColor" Value="#C62828"/>
                                                 </DataTrigger>

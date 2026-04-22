@@ -14,20 +14,15 @@ public enum BudgetPlanLayoutMode
     Horizontal
 }
 
-public enum BudgetLineFilter
-{
-    None,
-    Income,
-    Expense
-}
-
 public partial class BudgetPlanPageViewModel : ObservableObject
 {
     private readonly BudgetService _budgetService;
     private List<BudgetLine> _allYearLines = new();
+    private List<Category> _allCategories = new();
 
     public ObservableCollection<int> AvailableYears { get; } = new();
-    public ObservableCollection<Category> Categories { get; } = new();
+    public ObservableCollection<Category> RootCategories { get; } = new();
+    public ObservableCollection<Category> SubCategories { get; } = new();
 
     [ObservableProperty] private int selectedYear;
     [ObservableProperty] private BudgetPlanLayoutMode layoutMode = BudgetPlanLayoutMode.Vertical;
@@ -39,7 +34,10 @@ public partial class BudgetPlanPageViewModel : ObservableObject
     [ObservableProperty] private decimal totalExpense;
     [ObservableProperty] private decimal totalNet;
 
-    [ObservableProperty] private Category? selectedCategoryFilter;
+    [ObservableProperty] private Category? selectedRootCategory;
+    [ObservableProperty] private Category? selectedSubCategory;
+
+    public bool HasSubCategories => SubCategories.Count > 0;
 
     public BudgetPlanPageViewModel(BudgetService budgetService)
     {
@@ -54,7 +52,13 @@ public partial class BudgetPlanPageViewModel : ObservableObject
 
     partial void OnSelectedYearChanged(int value) => _ = LoadAsync();
 
-    partial void OnSelectedCategoryFilterChanged(Category? value) => ApplyCategoryFilter();
+    partial void OnSelectedRootCategoryChanged(Category? value)
+    {
+        UpdateSubCategories();
+        ApplyCategoryFilter();
+    }
+
+    partial void OnSelectedSubCategoryChanged(Category? value) => ApplyCategoryFilter();
 
     [RelayCommand]
     public async Task LoadAsync()
@@ -68,18 +72,18 @@ public partial class BudgetPlanPageViewModel : ObservableObject
             var all = await _budgetService.GetAllBudgetItemsAsync();
             _allYearLines = all.Where(b => b.Period.Year == SelectedYear).ToList();
 
-            var cats = await _budgetService.GetAllCategoriesAsync();
-            var previousFilterId = SelectedCategoryFilter?.Id ?? 0;
+            _allCategories = await _budgetService.GetAllCategoriesAsync();
 
-            Categories.Clear();
+            var previousRootId = SelectedRootCategory?.Id ?? 0;
+
+            RootCategories.Clear();
             var allCat = new Category { Id = 0, Name = "Alle categorieën" };
-            Categories.Add(allCat);
-            foreach (var cat in cats.OrderBy(c => c.Name))
-                Categories.Add(cat);
+            RootCategories.Add(allCat);
+            foreach (var cat in _allCategories.Where(c => c.ParentCategoryId == null).OrderBy(c => c.Name))
+                RootCategories.Add(cat);
 
-            // Restore previous selection or default to "Alle"
-            SelectedCategoryFilter = previousFilterId > 0
-                ? (Categories.FirstOrDefault(c => c.Id == previousFilterId) ?? allCat)
+            SelectedRootCategory = previousRootId > 0
+                ? (RootCategories.FirstOrDefault(c => c.Id == previousRootId) ?? allCat)
                 : allCat;
         }
         finally
@@ -88,11 +92,50 @@ public partial class BudgetPlanPageViewModel : ObservableObject
         }
     }
 
+    private void UpdateSubCategories()
+    {
+        SelectedSubCategory = null;
+        SubCategories.Clear();
+
+        if (SelectedRootCategory != null && SelectedRootCategory.Id != 0)
+        {
+            var subs = _allCategories
+                .Where(c => c.ParentCategoryId == SelectedRootCategory.Id)
+                .OrderBy(c => c.Name)
+                .ToList();
+
+            if (subs.Count > 0)
+            {
+                var allSub = new Category { Id = 0, Name = "Alle subcategorieën" };
+                SubCategories.Add(allSub);
+                foreach (var sub in subs)
+                    SubCategories.Add(sub);
+
+                SelectedSubCategory = allSub;
+            }
+        }
+
+        OnPropertyChanged(nameof(HasSubCategories));
+    }
+
     private void ApplyCategoryFilter()
     {
         var yearLines = _allYearLines;
-        if (SelectedCategoryFilter != null && SelectedCategoryFilter.Id != 0)
-            yearLines = yearLines.Where(b => b.CategoryId == SelectedCategoryFilter.Id).ToList();
+
+        if (SelectedSubCategory != null && SelectedSubCategory.Id != 0)
+        {
+            yearLines = yearLines.Where(b => b.CategoryId == SelectedSubCategory.Id).ToList();
+        }
+        else if (SelectedRootCategory != null && SelectedRootCategory.Id != 0)
+        {
+            var subIds = _allCategories
+                .Where(c => c.ParentCategoryId == SelectedRootCategory.Id)
+                .Select(c => c.Id)
+                .ToHashSet();
+            yearLines = yearLines
+                .Where(b => b.CategoryId == SelectedRootCategory.Id || subIds.Contains(b.CategoryId))
+                .ToList();
+        }
 
         MonthGroups.Clear();
 
@@ -158,45 +201,38 @@ public partial class MonthlyBudgetGroup : ObservableObject
     public decimal Expense { get; set; }
     public decimal Net { get; set; }
 
-    [ObservableProperty]
-    private BudgetLineFilter selectedLineFilter = BudgetLineFilter.None;
+    [ObservableProperty] private bool showIncome = false;
+    [ObservableProperty] private bool showExpense = false;
 
-    public bool IsIncomeFilterActive => SelectedLineFilter == BudgetLineFilter.Income;
-    public bool IsExpenseFilterActive => SelectedLineFilter == BudgetLineFilter.Expense;
-    public bool HasActiveFilter => SelectedLineFilter != BudgetLineFilter.None;
+    public bool HasActiveFilter => ShowIncome || ShowExpense;
 
-    partial void OnSelectedLineFilterChanged(BudgetLineFilter value)
+    partial void OnShowIncomeChanged(bool value)
     {
-        OnPropertyChanged(nameof(IsIncomeFilterActive));
-        OnPropertyChanged(nameof(IsExpenseFilterActive));
+        OnPropertyChanged(nameof(HasActiveFilter));
+        UpdateDisplayedLines();
+    }
+
+    partial void OnShowExpenseChanged(bool value)
+    {
         OnPropertyChanged(nameof(HasActiveFilter));
         UpdateDisplayedLines();
     }
 
     private void UpdateDisplayedLines()
     {
-        var filtered = SelectedLineFilter switch
-        {
-            BudgetLineFilter.Income => AllLines.Where(x => x.IsIncome),
-            BudgetLineFilter.Expense => AllLines.Where(x => !x.IsIncome),
-            _ => Enumerable.Empty<BudgetLine>()
-        };
+        var filtered = AllLines.Where(x => (x.IsIncome && ShowIncome) || (!x.IsIncome && ShowExpense));
         DisplayedLines = new ObservableCollection<BudgetLine>(filtered);
     }
 
     [RelayCommand]
     private void FilterIncome()
     {
-        SelectedLineFilter = SelectedLineFilter == BudgetLineFilter.Income
-            ? BudgetLineFilter.None
-            : BudgetLineFilter.Income;
+        ShowIncome = !ShowIncome;
     }
 
     [RelayCommand]
     private void FilterExpense()
     {
-        SelectedLineFilter = SelectedLineFilter == BudgetLineFilter.Expense
-            ? BudgetLineFilter.None
-            : BudgetLineFilter.Expense;
+        ShowExpense = !ShowExpense;
     }
 }

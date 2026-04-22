@@ -3,69 +3,103 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodel="clr-namespace:AppForLogin.ViewModel"
              xmlns:model="clr-namespace:DataAccess.Model;assembly=DataAccess"
-             xmlns:sys="clr-namespace:System;assembly=netstandard"
              x:Class="AppForLogin.Views.CreateBudgetItemPage"
              x:DataType="viewmodel:CreateBudgetItemViewModel"
-             Title="Create Budget Item">
-    
+             Title="Budgetlijn aanmaken">
     
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="20">
             
-            <Label Text="Create New Budget Item"
+            <Label Text="Nieuwe budgetlijn"
                    FontSize="24"
                    HorizontalOptions="Center"
                    FontAttributes="Bold"/>
 
             <!-- Category Selection -->
             <VerticalStackLayout Spacing="8">
-                <Label Text="Category"
+                <Label Text="Hoofdcategorie"
                        FontSize="16"
                        FontAttributes="Bold"/>
-                <Picker ItemsSource="{Binding Categories}"
+                <Picker ItemsSource="{Binding RootCategories}"
                         ItemDisplayBinding="{Binding Name}"
-                        SelectedItem="{Binding SelectedCategory, Mode=TwoWay}"
-                        Title="Select a category"/>
+                        SelectedItem="{Binding SelectedRootCategory, Mode=TwoWay}"
+                        Title="Kies een hoofdcategorie"/>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding HasSubCategories}">
+                <Label Text="Subcategorie"
+                       FontSize="16"
+                       FontAttributes="Bold"/>
+                <Picker ItemsSource="{Binding SubCategories}"
+                        ItemDisplayBinding="{Binding Name}"
+                        SelectedItem="{Binding SelectedSubCategory, Mode=TwoWay}"
+                        Title="Kies een subcategorie"/>
+            </VerticalStackLayout>
+
+            <!-- Income / Expense toggle -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Type"
+                       FontSize="16"
+                       FontAttributes="Bold"/>
+                <HorizontalStackLayout Spacing="12">
+                    <Label Text="Inkomst" VerticalOptions="Center" TextColor="Black"/>
+                    <Switch IsToggled="{Binding IsIncome, Mode=TwoWay}"
+                            OnColor="#4CAF50"/>
+                </HorizontalStackLayout>
             </VerticalStackLayout>
 
             <!-- Period Selection -->
             <VerticalStackLayout Spacing="8">
-                <Label Text="Period"
+                <Label Text="Periode"
                        FontSize="16"
                        FontAttributes="Bold"/>
                 <DatePicker Date="{Binding Period, Mode=TwoWay}"
-                            MinimumDate="{x:Static sys:DateTime.Now}"/>
+                            MinimumDate="{Binding MinimumDate}"
+                            MaximumDate="{Binding MaximumDate}"
+                            Format="MMMM yyyy"/>
             </VerticalStackLayout>
 
             <!-- Planned Amount -->
             <VerticalStackLayout Spacing="8">
-                <Label Text="Planned Amount"
+                <Label Text="Gepland bedrag"
                        FontSize="16"
                        FontAttributes="Bold"/>
                 <Entry Keyboard="Numeric"
-                       Placeholder="Enter planned amount"
+                       Placeholder="Vul het geplande bedrag in"
                        Text="{Binding PlannedAmount, Mode=TwoWay}"/>
+            </VerticalStackLayout>
+
+            <!-- Recurring toggle -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Herhaling"
+                       FontSize="16"
+                       FontAttributes="Bold"/>
+                <HorizontalStackLayout Spacing="12">
+                    <Label Text="Terugkerend (alle maanden van het jaar)" VerticalOptions="Center" TextColor="Black"/>
+                    <Switch IsToggled="{Binding IsRecurring, Mode=TwoWay}"
+                            OnColor="#2196F3"/>
+                </HorizontalStackLayout>
             </VerticalStackLayout>
 
             <!-- Optional Description -->
             <VerticalStackLayout Spacing="8">
-                <Label Text="Description (Optional)"
+                <Label Text="Omschrijving (optioneel)"
                        FontSize="16"
                        FontAttributes="Bold"/>
-                <Entry Placeholder="Optional description for initial transaction"
+                <Entry Placeholder="Optionele omschrijving"
                        Text="{Binding Description, Mode=TwoWay}"/>
             </VerticalStackLayout>
 
             <!-- Action Buttons -->
             <HorizontalStackLayout Spacing="20" HorizontalOptions="Center">
-                <Button Text="Cancel"
+                <Button Text="Annuleren"
                         Command="{Binding CancelCommand}"
                         BackgroundColor="#FF5252"
                         TextColor="White"
                         CornerRadius="8"
                         Padding="20,10"/>
                 
-                <Button Text="Create Budget Item"
+                <Button Text="Aanmaken"
                         Command="{Binding CreateBudgetItemCommand}"
                         BackgroundColor="#4CAF50"
                         TextColor="White"

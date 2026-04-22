@@ -14,6 +14,7 @@ namespace AppForLogin.ViewModel
     {
         private readonly BudgetService _budgetService;
         private readonly NavigationService _navigationService;
+        private List<Category> _allCategories = new();
 
         [ObservableProperty]
         private string name = string.Empty;
@@ -22,39 +23,73 @@ namespace AppForLogin.ViewModel
         private decimal plannedAmount;
 
         [ObservableProperty]
-        private DateTime period = DateTime.Now; // Changed from DateOnly to DateTime for DatePicker
-
-        [ObservableProperty]
-        private Category? selectedCategory; // Changed from int to Category object
+        private DateTime period = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
 
         [ObservableProperty]
         private string description = string.Empty;
 
-        public ObservableCollection<Category> Categories { get; } = new();
+        [ObservableProperty]
+        private bool isRecurring = false;
+
+        [ObservableProperty]
+        private bool isIncome = false;
+
+        public ObservableCollection<Category> RootCategories { get; } = new();
+        public ObservableCollection<Category> SubCategories { get; } = new();
+
+        [ObservableProperty]
+        private Category? selectedRootCategory;
+
+        [ObservableProperty]
+        private Category? selectedSubCategory;
+
+        public bool HasSubCategories => SubCategories.Count > 0;
+
+        public DateTime MinimumDate => new DateTime(DateTime.Today.Year, 1, 1);
+        public DateTime MaximumDate => new DateTime(DateTime.Today.Year, 12, 31);
 
         public CreateBudgetItemViewModel(BudgetService budgetService, NavigationService navigationService)
         {
             _budgetService = budgetService;
             _navigationService = navigationService;
-            
-            // Load categories when ViewModel is initialized
+
             LoadCategoriesAsync();
+        }
+
+        partial void OnSelectedRootCategoryChanged(Category? value)
+        {
+            UpdateSubCategories();
+        }
+
+        private void UpdateSubCategories()
+        {
+            SelectedSubCategory = null;
+            SubCategories.Clear();
+
+            if (SelectedRootCategory != null && SelectedRootCategory.Id != 0)
+            {
+                var subs = _allCategories
+                    .Where(c => c.ParentCategoryId == SelectedRootCategory.Id)
+                    .OrderBy(c => c.Name)
+                    .ToList();
+
+                foreach (var sub in subs)
+                    SubCategories.Add(sub);
+            }
+
+            OnPropertyChanged(nameof(HasSubCategories));
         }
 
         public async Task LoadCategoriesAsync()
         {
-            var categories = await _budgetService.GetAllCategoriesAsync();
-            Categories.Clear();
-            foreach (var category in categories)
-            {
-                Categories.Add(category);
-            }
-            
-            // Select first category by default if available
-            if (Categories.Any())
-            {
-                SelectedCategory = Categories.First();
-            }
+            _allCategories = await _budgetService.GetAllCategoriesAsync();
+
+            RootCategories.Clear();
+            foreach (var cat in _allCategories.Where(c => c.ParentCategoryId == null).OrderBy(c => c.Name))
+                RootCategories.Add(cat);
+
+            if (RootCategories.Any())
+                SelectedRootCategory = RootCategories.First();
         }
 
         [RelayCommand]
@@ -62,48 +97,73 @@ namespace AppForLogin.ViewModel
         {
             try
             {
-                if (SelectedCategory is null)
+                // Determine effective category: prefer sub if selected, otherwise root
+                var effectiveCategory = (SelectedSubCategory != null)
+                    ? SelectedSubCategory
+                    : SelectedRootCategory;
+
+                if (effectiveCategory is null)
                 {
-                    await Shell.Current.DisplayAlertAsync("Error", "Please select a category", "OK");
+                    await Shell.Current.DisplayAlertAsync("Error", "Selecteer een categorie", "OK");
                     return;
                 }
 
-                // Create new budget item
-                var newBudgetItem = new BudgetLine
+                // If subcategories exist, require the user to pick one explicitly
+                if (HasSubCategories && SelectedSubCategory is null)
                 {
-                    CategoryId = SelectedCategory.Id,
-                    Period = new DateTime(period.Year, period.Month, 1) , // Convert DateTime to DateOnly
-                    PlannedAmount = PlannedAmount
-                };
-
-                // Add to database
-                await _budgetService.AddBudgetItemAsync(newBudgetItem);
-
-                // Optionally: Add initial transaction if description is provided
-                if (!string.IsNullOrWhiteSpace(Description))
-                {
-                    var transaction = new Transaction
-                    {
-                        Description = Description,
-                        Date = Period, // Use the DateTime directly
-                        CategoryId = SelectedCategory.Id,
-                        Amount = PlannedAmount,
-                        IsIncome = false, // Assuming this is an expense
-                        Status = StatusTrans.Manual
-                    };
-                    
-                    await _budgetService.AddTransactionAsync(transaction);
-                    
-                    
+                    await Shell.Current.DisplayAlertAsync("Error", "Selecteer een subcategorie", "OK");
+                    return;
                 }
 
-                // Navigate back or show success message
+                if (IsRecurring)
+                {
+                    for (int month = 1; month <= 12; month++)
+                    {
+                        var budgetLine = new BudgetLine
+                        {
+                            CategoryId = effectiveCategory.Id,
+                            Period = new DateTime(DateTime.Today.Year, month, 1),
+                            PlannedAmount = PlannedAmount,
+                            IsIncome = IsIncome,
+                            Notes = string.IsNullOrWhiteSpace(Description) ? null : Description
+                        };
+                        await _budgetService.AddBudgetItemAsync(budgetLine);
+                    }
+                }
+                else
+                {
+                    var newBudgetItem = new BudgetLine
+                    {
+                        CategoryId = effectiveCategory.Id,
+                        Period = new DateTime(Period.Year, Period.Month, 1),
+                        PlannedAmount = PlannedAmount,
+                        IsIncome = IsIncome,
+                        Notes = string.IsNullOrWhiteSpace(Description) ? null : Description
+                    };
+
+                    await _budgetService.AddBudgetItemAsync(newBudgetItem);
+
+                    if (!string.IsNullOrWhiteSpace(Description))
+                    {
+                        var transaction = new Transaction
+                        {
+                            Description = Description,
+                            Date = Period,
+                            CategoryId = effectiveCategory.Id,
+                            Amount = PlannedAmount,
+                            IsIncome = IsIncome,
+                            Status = StatusTrans.Manual
+                        };
+
+                        await _budgetService.AddTransactionAsync(transaction);
+                    }
+                }
+
                 await _navigationService.GoBackAsync();
             }
             catch (Exception ex)
             {
-                // Handle error - show to user
-                await Shell.Current.DisplayAlert("Error", $"Failed to create budget item: {ex.Message}", "OK");
+                await Shell.Current.DisplayAlert("Error", $"Aanmaken mislukt: {ex.Message}", "OK");
             }
         }
 
