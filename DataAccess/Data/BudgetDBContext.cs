@@ -12,6 +12,8 @@ namespace DataAccess.Data
         // Optioneel: junction table voor splitsingen
         public DbSet<TransactionBudgetLine> TransactionBudgetLines { get; set; }
 
+        public DbSet<RabobankImport> RabobankImports { get; set; }
+
         public BudgetDBContext(DbContextOptions<BudgetDBContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -23,6 +25,7 @@ namespace DataAccess.Data
             modelBuilder.Entity<BudgetLine>().ToTable("BudgetLine");
             modelBuilder.Entity<Transaction>().ToTable("Transaction");
             modelBuilder.Entity<TransactionBudgetLine>().ToTable("TransactionBudgetLine");
+            modelBuilder.Entity<RabobankImport>().ToTable("RabobankImport");
 
             // Category: self reference category voor hierarchie
             modelBuilder.Entity<Category>()
@@ -90,6 +93,40 @@ namespace DataAccess.Data
 
             // Timestamps: default waarden kunnen via DB of SaveChanges worden ingesteld.
             // (Je kunt hier ook ValueGeneratedOnAdd/OnUpdate configureren indien gewenst.)
+
+            // RabobankImport configuratie
+            modelBuilder.Entity<RabobankImport>()
+                .HasIndex(r => r.Volgnr)
+                .IsUnique()
+                .HasDatabaseName("idx_rabobankimport_volgnr");
+
+            modelBuilder.Entity<RabobankImport>()
+                .Property(r => r.Status)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => (RabobankImportStatus)Enum.Parse(typeof(RabobankImportStatus), v))
+                .HasColumnType("enum('Pending','Processed','Skipped','Duplicate')")
+                .IsRequired();
+
+            modelBuilder.Entity<RabobankImport>()
+                .Property(r => r.Bedrag)
+                .HasColumnType("decimal(10,2)");
+
+            modelBuilder.Entity<RabobankImport>()
+                .Property(r => r.SaldoNaTrn)
+                .HasColumnType("decimal(10,2)");
+
+            modelBuilder.Entity<RabobankImport>()
+                .HasOne(r => r.Transaction)
+                .WithMany()
+                .HasForeignKey(r => r.TransactionId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<RabobankImport>()
+                .HasOne(r => r.SuggestedBudgetLine)
+                .WithMany()
+                .HasForeignKey(r => r.SuggestedBudgetLineId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }
