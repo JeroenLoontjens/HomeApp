@@ -28,6 +28,7 @@ namespace AppForLogin
             Routing.RegisterRoute(nameof(TransactionChartPage), typeof(TransactionChartPage));
             Routing.RegisterRoute(nameof(CreateBudgetItemPage), typeof(CreateBudgetItemPage));
             Routing.RegisterRoute(nameof(BudgetLineDetailPage), typeof(BudgetLineDetailPage));
+            Routing.RegisterRoute(nameof(CsvImportPage), typeof(CsvImportPage));
 
 
             // ensure LoginPage route exists so Shell navigation can target it

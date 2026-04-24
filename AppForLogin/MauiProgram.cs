@@ -3,6 +3,7 @@ using AppForLogin.Services;
 using AppForLogin.ViewModel;
 using AppForLogin.Views;
 using DataAccess.Data;
+using DataAccess.Import;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
@@ -84,6 +85,7 @@ namespace AppForLogin
             builder.Services.AddTransient<BudgetPage>();
             builder.Services.AddTransient<CreateBudgetItemPage>();
             builder.Services.AddTransient<BudgetLineDetailPage>();
+            builder.Services.AddTransient<CsvImportPage>();
 
             // ViewModels
             builder.Services.AddTransient<LoginPageViewModel>();
@@ -96,6 +98,7 @@ namespace AppForLogin
             builder.Services.AddTransient<CategoriesDetailViewModel>();
             builder.Services.AddTransient<BudgetLineDetailViewModel>();
             builder.Services.AddTransient<BudgetPlanPageViewModel>();
+            builder.Services.AddTransient<CsvImportViewModel>();
 
             //Services
             // Register UserService with a configured HttpClient without requiring AddHttpClient
@@ -109,6 +112,7 @@ namespace AppForLogin
             builder.Services.AddSingleton<IloginRepository, LoginService>();
             builder.Services.AddSingleton<BudgetService>();
             builder.Services.AddSingleton<NavigationService>();
+            builder.Services.AddTransient<CsvImportService>();
 
             
 

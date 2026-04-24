@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodel="clr-namespace:AppForLogin.ViewModel"
+             xmlns:model="clr-namespace:DataAccess.Model;assembly=DataAccess"
+             x:Class="AppForLogin.Views.CsvImportPage"
+             x:DataType="viewmodel:CsvImportViewModel"
+             Title="CSV Import"
+             BackgroundColor="White">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="12">
+
+            <!-- Header -->
+            <Label Text="📥 CSV Import" FontSize="24" FontAttributes="Bold" Margin="0,0,0,16" TextColor="Black"/>
+
+            <!-- File selection -->
+            <Button Text="📂 Selecteer CSV bestand"
+                    Command="{Binding SelecteerBestandCommand}"
+                    IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"/>
+
+            <Label Text="{Binding GeselecteerdBestand}"
+                   IsVisible="{Binding GeselecteerdBestand, Converter={StaticResource NullToBoolConverter}}"
+                   TextColor="Green"/>
+
+            <!-- Import button + busy indicator -->
+            <Button Text="▶ Importeer"
+                    Command="{Binding ImporteerCommand}"
+                    IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"/>
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}"
+                               IsVisible="{Binding IsBusy}"
+                               Color="#4CAF50"/>
+
+            <!-- Result section -->
+            <Frame IsVisible="{Binding HeeftResultaat}"
+                   BackgroundColor="#E8F5E9"
+                   BorderColor="#4CAF50"
+                   Padding="12">
+                <Label Text="{Binding ImportResultTekst}" TextColor="Black"/>
+            </Frame>
+
+            <!-- Pending rows -->
+            <Label Text="Wachtende rijen"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   Margin="0,16,0,8"
+                   TextColor="Black"/>
+
+            <CollectionView ItemsSource="{Binding PendingRijen}" SelectionMode="None">
+                <CollectionView.EmptyView>
+                    <Label Text="Geen wachtende rijen" TextColor="Gray"/>
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="model:RabobankImport">
+                        <Grid ColumnDefinitions="80,90,*,80" Padding="4,8">
+                            <!-- Datum -->
+                            <Label Grid.Column="0"
+                                   Text="{Binding Datum, StringFormat='{0:dd-MM-yy}'}"
+                                   FontSize="13"
+                                   TextColor="Black"/>
+                            <!-- Bedrag -->
+                            <Label Grid.Column="1"
+                                   Text="{Binding Bedrag, StringFormat='{0:C2}'}"
+                                   FontSize="13"
+                                   HorizontalTextAlignment="End"
+                                   TextColor="{Binding Bedrag, Converter={StaticResource AmountToColorConverter}}"/>
+                            <!-- Naam tegenpartij -->
+                            <Label Grid.Column="2"
+                                   Text="{Binding NaamTegenpartij}"
+                                   FontSize="13"
+                                   LineBreakMode="TailTruncation"
+                                   Margin="8,0"
+                                   TextColor="Black"/>
+                            <!-- Status badge -->
+                            <Label Grid.Column="3"
+                                   Text="{Binding Status}"
+                                   FontSize="11"
+                                   HorizontalTextAlignment="Center"
+                                   TextColor="Gray"/>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
