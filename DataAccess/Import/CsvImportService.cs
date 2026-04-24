@@ -15,11 +15,19 @@ namespace DataAccess.Import
 
         public List<RabobankCsvRow> ParseCsv(Stream fileStream)
         {
+            // Peek at the first line to auto-detect the delimiter (comma or semicolon).
+            using var peekReader = new StreamReader(fileStream, leaveOpen: true);
+            var firstLine = peekReader.ReadLine() ?? string.Empty;
+            fileStream.Position = 0;
+
+            var delimiter = firstLine.Contains(';') ? ";" : ",";
+
             var config = new CsvConfiguration(DutchCulture)
             {
-                Delimiter = ";",
+                Delimiter = delimiter,
                 HasHeaderRecord = true,
                 MissingFieldFound = null,
+                BadDataFound = null,
             };
 
             using var reader = new StreamReader(fileStream, leaveOpen: true);
