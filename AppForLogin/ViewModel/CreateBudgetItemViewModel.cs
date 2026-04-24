@@ -30,15 +30,33 @@ namespace AppForLogin.ViewModel
         [ObservableProperty]
         private string description = string.Empty;
 
+        [ObservableProperty] 
+        private bool isIncome;
+
+        [ObservableProperty]
+        private bool isRecurringMonthly;
+
+        [ObservableProperty]
+        private bool canCreateRecurringForSelectedPeriod = true;
+
         public ObservableCollection<Category> Categories { get; } = new();
 
         public CreateBudgetItemViewModel(BudgetService budgetService, NavigationService navigationService)
         {
             _budgetService = budgetService;
             _navigationService = navigationService;
+            CanCreateRecurringForSelectedPeriod = Period.Year == DateTime.Today.Year;
             
             // Load categories when ViewModel is initialized
             LoadCategoriesAsync();
+        }
+
+        partial void OnPeriodChanged(DateTime value)
+        {
+            CanCreateRecurringForSelectedPeriod = value.Year == DateTime.Today.Year;
+
+            if (!CanCreateRecurringForSelectedPeriod)
+                IsRecurringMonthly = false;
         }
 
         public async Task LoadCategoriesAsync()
@@ -68,34 +86,38 @@ namespace AppForLogin.ViewModel
                     return;
                 }
 
-                // Create new budget item
-                var newBudgetItem = new BudgetLine
-                {
-                    CategoryId = SelectedCategory.Id,
-                    Period = new DateTime(period.Year, period.Month, 1) , // Convert DateTime to DateOnly
-                    PlannedAmount = PlannedAmount
-                };
+                var startPeriod = new DateTime(period.Year, period.Month, 1);
 
-                // Add to database
-                await _budgetService.AddBudgetItemAsync(newBudgetItem);
-
-                // Optionally: Add initial transaction if description is provided
-                if (!string.IsNullOrWhiteSpace(Description))
+                if (IsRecurringMonthly && period.Year == DateTime.Today.Year)
                 {
-                    var transaction = new Transaction
-                    {
-                        Description = Description,
-                        Date = Period, // Use the DateTime directly
-                        CategoryId = SelectedCategory.Id,
-                        Amount = PlannedAmount,
-                        IsIncome = false, // Assuming this is an expense
-                        Status = StatusTrans.Manual
-                    };
-                    
-                    await _budgetService.AddTransactionAsync(transaction);
-                    
-                    
+                    var recurringItems = Enumerable.Range(startPeriod.Month, 13 - startPeriod.Month)
+                        .Select(month => new BudgetLine
+                        {
+                            CategoryId = SelectedCategory.Id,
+                            Period = new DateTime(startPeriod.Year, month, 1),
+                            PlannedAmount = PlannedAmount,
+                            IsIncome = IsIncome,
+                            Notes = Description,
+                        })
+                        .ToList();
+
+                    await _budgetService.AddBudgetItemsAsync(recurringItems);
                 }
+                else
+                {
+                    var newBudgetItem = new BudgetLine
+                    {
+                        CategoryId = SelectedCategory.Id,
+                        Period = startPeriod,
+                        PlannedAmount = PlannedAmount,
+                        IsIncome = IsIncome,
+                        Notes = Description,
+                    };
+
+                    await _budgetService.AddBudgetItemAsync(newBudgetItem);
+                }
+
+                
 
                 // Navigate back or show success message
                 await _navigationService.GoBackAsync();

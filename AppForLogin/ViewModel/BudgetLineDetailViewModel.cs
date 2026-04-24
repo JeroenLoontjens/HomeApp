@@ -80,4 +80,26 @@ public partial class BudgetLineDetailViewModel : ObservableObject
 
     [RelayCommand]
     private async Task ReturnAsync() => await Shell.Current.GoToAsync("..");
+
+    [RelayCommand]
+    private async Task DeleteAsync()
+    {
+        if (BudgetLine is null) return;
+        var confirm = await Shell.Current.DisplayAlertAsync("Bevestigen", "Weet je zeker dat je dit budgetitem wilt verwijderen?", "Ja", "Nee");
+        if (!confirm) return;
+        try
+        {
+            IsBusy = true;
+            await _budgetService.DeleteBudgetItemAsync(BudgetLine.Id);
+            await Shell.Current.GoToAsync("..");
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlertAsync("Fout", $"Verwijderen mislukt: {ex.Message}", "OK");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
 }

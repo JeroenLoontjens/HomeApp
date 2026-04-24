@@ -37,6 +37,19 @@
                             MinimumDate="{x:Static sys:DateTime.Now}"/>
             </VerticalStackLayout>
 
+            <VerticalStackLayout Spacing="4">
+                <Label Text="Maandelijks terugkerend t/m december?"
+                       FontSize="13"
+                       TextColor="Gray"/>
+                <Switch IsToggled="{Binding IsRecurringMonthly, Mode=TwoWay}"
+                        IsEnabled="{Binding CanCreateRecurringForSelectedPeriod}"
+                        OnColor="#6B46C1"
+                        ThumbColor="White"/>
+                <Label Text="Maakt automatisch budgetlijnen aan vanaf de gekozen maand t/m december van het lopende jaar."
+                       FontSize="12"
+                       TextColor="Gray"/>
+            </VerticalStackLayout>
+
             <!-- Planned Amount -->
             <VerticalStackLayout Spacing="8">
                 <Label Text="Planned Amount"
@@ -46,13 +59,21 @@
                        Placeholder="Enter planned amount"
                        Text="{Binding PlannedAmount, Mode=TwoWay}"/>
             </VerticalStackLayout>
+            
+            <!-- IsIncome selector-->
+            <VerticalStackLayout Spacing="4">
+                <Label Text="Inkomsten?" FontSize="13" TextColor="Gray"/>
+                <Switch IsToggled="{Binding IsIncome, Mode=TwoWay}"
+                        OnColor="Green"
+                        OffColor="LightGray"/>
+            </VerticalStackLayout>
 
             <!-- Optional Description -->
             <VerticalStackLayout Spacing="8">
-                <Label Text="Description (Optional)"
+                <Label Text="Description (Optional but recommended)"
                        FontSize="16"
                        FontAttributes="Bold"/>
-                <Entry Placeholder="Optional description for initial transaction"
+                <Entry Placeholder="Some notes for recognition"
                        Text="{Binding Description, Mode=TwoWay}"/>
             </VerticalStackLayout>
 

@@ -22,7 +22,7 @@
 
     <!-- Use Grid so header can be persistent and CollectionView fills remaining space -->
     <Grid RowDefinitions="Auto,Auto,Auto,*" ColumnDefinitions="*">
-        <Grid Grid.Row="0" RowDefinitions="Auto" ColumnDefinitions="Auto,*">
+        <Grid Grid.Row="0" RowDefinitions="Auto" ColumnDefinitions="Auto,*,Auto">
             <!--<CollectionView ItemsSource="{Binding FilteredTransactions}"></CollectionView>-->
             <!-- Row 0: Title -->
             <Label Grid.Row="0"
@@ -33,10 +33,22 @@
                HorizontalOptions="Start"
                Margin="16,16,16,0"
                TextColor="{StaticResource PrimaryColor}" />
+            <Button Text="Grafiek"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Command="{Binding OpenTransactionChartCommand}"
+                    HorizontalOptions="End"
+                    VerticalOptions="Center"
+                    Margin="0,16,8,0"
+                    BackgroundColor="{StaticResource PrimaryColor}"
+                    TextColor="White"
+                    CornerRadius="10"
+                    Padding="14,8"
+                    FontSize="14" />
             <Button Text="+" 
             WidthRequest="56"
             Grid.Row="0"
-            Grid.Column="1"
+            Grid.Column="2"
             HeightRequest="56"
             CornerRadius="28"
             FontSize="24"

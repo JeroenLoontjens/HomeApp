@@ -22,6 +22,9 @@ namespace AppForLogin.ViewModel
         [ObservableProperty] private string budgetLineSearchText;
         [ObservableProperty] private BudgetLine selectedBudgetLine;
         [ObservableProperty] private decimal splitAmount;
+        [ObservableProperty] private DateTime budgetLineStartMonth = new(DateTime.Today.Year, DateTime.Today.Month, 1);
+        [ObservableProperty] private DateTime budgetLineEndMonth = new(DateTime.Today.Year, 12, 1);
+        [ObservableProperty] private Category selectedBudgetLineCategoryFilter;
 
         private decimal SplitTotal => Transaction?.TransactionBudgetLines.Sum(x => x.AmountAllocated) ?? 0;
         private bool SplitsMatchTotal => Transaction != null && SplitTotal == Transaction.Amount;
@@ -31,6 +34,7 @@ namespace AppForLogin.ViewModel
 
         public ObservableCollection<BudgetLine> BudgetLines { get; } = [];
         public ObservableCollection<BudgetLine> FilteredBudgetLines { get; } = [];
+        public ObservableCollection<Category> BudgetLineCategories { get; } = [];
 
         public TransactionDetailViewModel(BudgetService budgetService)
         {
@@ -48,12 +52,45 @@ namespace AppForLogin.ViewModel
             ApplyBudgetLineFilter();
         }
 
+        private async Task LoadBudgetLineCategoriesAsync()
+        {
+            var categories = await _budgetService.GetAllCategoriesAsync();
+
+            BudgetLineCategories.Clear();
+
+            var allCategories = new Category { Id = 0, Name = "Alle categorieën" };
+            BudgetLineCategories.Add(allCategories);
+
+            foreach (var category in categories.OrderBy(c => c.Name))
+                BudgetLineCategories.Add(category);
+
+            SelectedBudgetLineCategoryFilter = BudgetLineCategories.FirstOrDefault();
+        }
+
         partial void OnBudgetLineSearchTextChanged(string value) => ApplyBudgetLineFilter();
+        partial void OnBudgetLineStartMonthChanged(DateTime value) => ApplyBudgetLineFilter();
+        partial void OnBudgetLineEndMonthChanged(DateTime value) => ApplyBudgetLineFilter();
+        partial void OnSelectedBudgetLineCategoryFilterChanged(Category value) => ApplyBudgetLineFilter();
 
         private void ApplyBudgetLineFilter()
         {
             FilteredBudgetLines.Clear();
             var filtered = BudgetLines.AsEnumerable();
+
+            var startMonth = new DateTime(BudgetLineStartMonth.Year, BudgetLineStartMonth.Month, 1);
+            var endMonth = new DateTime(BudgetLineEndMonth.Year, BudgetLineEndMonth.Month, 1);
+
+            if (startMonth > endMonth)
+                (startMonth, endMonth) = (endMonth, startMonth);
+
+            filtered = filtered.Where(b =>
+            {
+                var budgetMonth = new DateTime(b.Period.Year, b.Period.Month, 1);
+                return budgetMonth >= startMonth && budgetMonth <= endMonth;
+            });
+
+            if (SelectedBudgetLineCategoryFilter?.Id > 0)
+                filtered = filtered.Where(b => b.CategoryId == SelectedBudgetLineCategoryFilter.Id);
 
             if (!string.IsNullOrWhiteSpace(BudgetLineSearchText))
             {
@@ -62,7 +99,10 @@ namespace AppForLogin.ViewModel
                     b.Notes?.Contains(BudgetLineSearchText, StringComparison.OrdinalIgnoreCase) == true);
             }
 
-            foreach (var item in filtered)
+            foreach (var item in filtered
+                .OrderByDescending(b => b.Period)
+                .ThenBy(b => b.Category?.Name)
+                .ThenBy(b => b.Notes))
                 FilteredBudgetLines.Add(item);
         }
 
@@ -76,6 +116,7 @@ namespace AppForLogin.ViewModel
                 _navigationTransaction = t;
                 _originalTransaction = CloneTransaction(t);
                 Transaction = CloneTransaction(t);
+                InitializeBudgetLineFilterRange(t.Date);
             }
             else
             {
@@ -83,7 +124,20 @@ namespace AppForLogin.ViewModel
                 _navigationTransaction = newTransaction;
                 _originalTransaction = CloneTransaction(newTransaction);
                 Transaction = CloneTransaction(newTransaction);
+                InitializeBudgetLineFilterRange(newTransaction.Date);
             }
+
+            _ = LoadBudgetLineCategoriesAsync();
+            ApplyBudgetLineFilter();
+        }
+
+        [RelayCommand]
+        private void ResetBudgetLineFilters()
+        {
+            InitializeBudgetLineFilterRange(Transaction?.Date ?? DateTime.Today);
+            BudgetLineSearchText = string.Empty;
+            SelectedBudgetLineCategoryFilter = BudgetLineCategories.FirstOrDefault();
+            ApplyBudgetLineFilter();
         }
 
         #region Split Commands
@@ -307,6 +361,15 @@ namespace AppForLogin.ViewModel
 
             foreach (var line in source.TransactionBudgetLines ?? Enumerable.Empty<TransactionBudgetLine>())
                 target.TransactionBudgetLines.Add(CloneTransactionBudgetLine(line));
+        }
+
+        private void InitializeBudgetLineFilterRange(DateTime referenceDate)
+        {
+            var effectiveDate = referenceDate == default ? DateTime.Today : referenceDate;
+            var startDate = effectiveDate.AddMonths(-1);
+
+            BudgetLineStartMonth = new DateTime(startDate.Year, startDate.Month, 1);
+            BudgetLineEndMonth = new DateTime(effectiveDate.Year, effectiveDate.Month, 1);
         }
     }
 }

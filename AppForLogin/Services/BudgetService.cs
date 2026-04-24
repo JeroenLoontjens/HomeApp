@@ -50,6 +50,13 @@ namespace AppForLogin.Services
             await context.SaveChangesAsync();
         }
 
+        public async Task AddBudgetItemsAsync(IEnumerable<BudgetLine> items)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            context.BudgetLines.AddRange(items);
+            await context.SaveChangesAsync();
+        }
+
         public async Task UpdateBudgetItemAsync(BudgetLine item)
         {
             await using var context = await _contextFactory.CreateDbContextAsync();

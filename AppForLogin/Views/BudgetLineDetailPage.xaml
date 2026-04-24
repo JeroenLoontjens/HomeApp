@@ -101,6 +101,14 @@
                     CornerRadius="10"
                     HeightRequest="48"
                     IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"/>
+            <Button Text="Delete"
+                    Command="{Binding DeleteCommand}"
+                    BackgroundColor="Red"
+                    TextColor="White"
+                    CornerRadius="10"
+                    HeightRequest="48"
+                    IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
+                />
         </VerticalStackLayout>
 
     </Grid>

@@ -57,7 +57,7 @@
                 </VerticalStackLayout>
 
                 <VerticalStackLayout Spacing="4">
-                    <Label Text="Ouder categorie" FontSize="13" TextColor="Gray"/>
+                    <Label Text="Sub-Categorie van:" FontSize="13" TextColor="Gray"/>
                     <Border Stroke="#E5E5E5" StrokeThickness="1" Padding="0">
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="8"/>

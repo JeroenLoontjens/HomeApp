@@ -62,7 +62,44 @@
                     <Label Text="Splitsing toevoegen" TextColor="Purple" FontAttributes="Bold" />
 
                     <SearchBar Placeholder="search filter for BudgetLinepicker..."
-                   Text="{Binding BudgetLineSearchText}" BackgroundColor="White" PlaceholderColor="LightGray" />
+                   Text="{Binding BudgetLineSearchText}" BackgroundColor="White" PlaceholderColor="LightGray" TextColor="Black" />
+
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="8" RowSpacing="8">
+                        <VerticalStackLayout Grid.Row="0" Grid.Column="0" Spacing="4">
+                            <Label Text="Begin maand" TextColor="Black" FontSize="12"/>
+                            <DatePicker Date="{Binding BudgetLineStartMonth}"
+                                        Format="MMM yyyy"
+                                        BackgroundColor="White"
+                                        TextColor="Black"/>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Grid.Row="0" Grid.Column="1" Spacing="4">
+                            <Label Text="Eind maand" TextColor="Black" FontSize="12"/>
+                            <DatePicker Date="{Binding BudgetLineEndMonth}"
+                                        Format="MMM yyyy"
+                                        BackgroundColor="White"
+                                        TextColor="Black"/>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Grid.Row="1" Grid.ColumnSpan="2" Spacing="4">
+                            <Label Text="Categorie" TextColor="Black" FontSize="12"/>
+                            <Picker 
+                                    ItemsSource="{Binding BudgetLineCategories}"
+                                    ItemDisplayBinding="{Binding Name}"
+                                    SelectedItem="{Binding SelectedBudgetLineCategoryFilter}"
+                                    BackgroundColor="White"
+                                    TextColor="Black"/>
+                        </VerticalStackLayout>
+
+                        <Button Grid.Row="2"
+                                Grid.ColumnSpan="2"
+                                Text="Reset filters"
+                                Command="{Binding ResetBudgetLineFiltersCommand}"
+                                BackgroundColor="White"
+                                TextColor="Purple"
+                                BorderColor="Purple"
+                                BorderWidth="1"/>
+                    </Grid>
 
                     <Picker Title="BudgetLine picker" TitleColor="Black"
                 ItemsSource="{Binding FilteredBudgetLines}"

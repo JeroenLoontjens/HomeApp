@@ -213,6 +213,12 @@ namespace AppForLogin.ViewModel
         }
 
         [RelayCommand]
+        private async Task OpenTransactionChart()
+        {
+            await Shell.Current.GoToAsync(nameof(TransactionChartPage));
+        }
+
+        [RelayCommand]
         private async Task ReLoadTransactions()
         {
             await LoadTransactionsAsync();

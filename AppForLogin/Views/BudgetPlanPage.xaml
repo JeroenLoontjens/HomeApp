@@ -28,13 +28,32 @@
                     WidthRequest="100"
                     Margin="0,0,8,0"/>
 
-            <Picker Title="Categorie"
-                    ItemsSource="{Binding Categories}"
+            <Picker Title="Hoofdcategorie"
+                    ItemsSource="{Binding RootCategories}"
                     ItemDisplayBinding="{Binding Name}"
-                    SelectedItem="{Binding SelectedCategoryFilter, Mode=TwoWay}"
+                    SelectedItem="{Binding SelectedRootCategoryFilter, Mode=TwoWay}"
                     TextColor="Black"
-                    WidthRequest="160"
+                    WidthRequest="180"
                     Margin="0,0,8,0"/>
+
+            <Picker Title="Subcategorie"
+                    ItemsSource="{Binding SubCategories}"
+                    ItemDisplayBinding="{Binding Name}"
+                    SelectedItem="{Binding SelectedSubCategoryFilter, Mode=TwoWay}"
+                    IsEnabled="{Binding IsSubCategoryFilterEnabled}"
+                    TextColor="Black"
+                    WidthRequest="180"
+                    Margin="0,0,8,0"/>
+
+            <HorizontalStackLayout Spacing="6" VerticalOptions="Center" Margin="0,0,8,0">
+                <Label Text="Alle inkomsten" TextColor="Black" VerticalTextAlignment="Center"/>
+                <Switch IsToggled="{Binding ShowAllIncomeLines, Mode=TwoWay}" OnColor="#2E7D32" ThumbColor="White"/>
+            </HorizontalStackLayout>
+
+            <HorizontalStackLayout Spacing="6" VerticalOptions="Center" Margin="0,0,8,0">
+                <Label Text="Alle uitgaven" TextColor="Black" VerticalTextAlignment="Center"/>
+                <Switch IsToggled="{Binding ShowAllExpenseLines, Mode=TwoWay}" OnColor="#C62828" ThumbColor="White"/>
+            </HorizontalStackLayout>
 
             <Button Text="Ververs"
                     Command="{Binding LoadCommand}"
@@ -99,7 +118,7 @@
                                         <Setter Property="BackgroundColor" Value="#C8E6C9"/>
                                     </DataTrigger>
                                 </Grid.Triggers>
-                                <Label TextColor="Gray">
+                                <Label Text="In" TextColor="Black">
                                     <Label.Triggers>
                                         <DataTrigger TargetType="Label" Binding="{Binding IsIncomeFilterActive}" Value="True">
                                             <Setter Property="FontAttributes" Value="Bold"/>
@@ -127,7 +146,7 @@
                                         <Setter Property="BackgroundColor" Value="#FFCDD2"/>
                                     </DataTrigger>
                                 </Grid.Triggers>
-                                <Label TextColor="Gray">
+                                <Label Text="Uit" TextColor="Black">
                                     <Label.Triggers>
                                         <DataTrigger TargetType="Label" Binding="{Binding IsExpenseFilterActive}" Value="True">
                                             <Setter Property="FontAttributes" Value="Bold"/>
@@ -146,7 +165,7 @@
                             </Grid>
 
                             <!-- Hint when no filter active -->
-                            <Label Text="Tik op Inkomsten of Uitgaven om budgetlijnen te zien"
+                            <Label Text="Tik op Inkomsten en/of Uitgaven om budgetlijnen te zien"
                                    FontSize="11"
                                    TextColor="Gray"
                                    Margin="6,0"
@@ -162,8 +181,8 @@
 
                                 <CollectionView.ItemTemplate>
                                     <DataTemplate x:DataType="model:BudgetLine">
-                                        <generic:RowGrid MainText="{Binding Category.Name}"
-                                                         SubText="{Binding Notes}"
+                                        <generic:RowGrid MainText="{Binding Notes}"
+                                                         SubText="{Binding Category.Name}"
                                                          RightText="{Binding PlannedAmount, StringFormat='€ {0:N2}'}"
                                                          MainFontSize="13"
                                                          SubFontSize="10"
@@ -256,7 +275,7 @@
                                     </Grid>
 
                                     <!-- Hint when no filter active -->
-                                    <Label Text="Tik op In/Uit om te filteren"
+                                    <Label Text="Tik op In en/of Uit om te filteren"
                                            FontSize="10"
                                            TextColor="Gray"
                                            IsVisible="{Binding HasActiveFilter, Converter={StaticResource InverseBoolConverter}}"/>
@@ -271,8 +290,8 @@
 
                                         <CollectionView.ItemTemplate>
                                             <DataTemplate x:DataType="model:BudgetLine">
-                                                <generic:RowGrid MainText="{Binding Category.Name}"
-                                                                 SubText="{Binding Notes}"
+                                                <generic:RowGrid MainText="{Binding Notes}"
+                                                                 SubText="{Binding Category.Name}"
                                                                  RightText="{Binding PlannedAmount, StringFormat='€ {0:N2}'}"
                                                                  MainFontSize="13"
                                                                  SubFontSize="10"

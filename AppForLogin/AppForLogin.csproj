@@ -132,6 +132,9 @@
 	  <MauiXaml Update="Views\TransactionDetailPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+   <MauiXaml Update="Views\TransactionChartPage.xaml">
+		<Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\UsersAdminPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

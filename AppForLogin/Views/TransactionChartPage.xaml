@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodel="clr-namespace:AppForLogin.ViewModel"
+             x:Class="AppForLogin.Views.TransactionChartPage"
+             x:DataType="viewmodel:TransactionChartPageViewModel"
+             Title="Transactie grafiek"
+             BackgroundColor="White">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="16">
+            <Grid ColumnDefinitions="Auto,*,Auto" VerticalOptions="Center">
+                <Button Text="←"
+                        Command="{Binding ReturnCommand}"
+                        BackgroundColor="Transparent"
+                        TextColor="#6B46C1"
+                        FontSize="20"
+                        WidthRequest="44" />
+
+                <Label Grid.Column="1"
+                       Text="Transactie grafiek"
+                       FontSize="24"
+                       FontAttributes="Bold"
+                       TextColor="#6B46C1"
+                       VerticalOptions="Center" />
+
+                <Picker Grid.Column="2"
+                        Title="Jaar"
+                        ItemsSource="{Binding AvailableYears}"
+                        SelectedItem="{Binding SelectedYear}"
+                        WidthRequest="110"
+                        TextColor="Black" />
+            </Grid>
+
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                <Border Stroke="#E5E5E5" StrokeThickness="1" Padding="12" BackgroundColor="#F0FFF4">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Inkomsten" TextColor="#2E7D32" FontAttributes="Bold" />
+                        <Label Text="{Binding TotalIncome, StringFormat='€ {0:N2}'}" TextColor="Black" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Grid.Column="1" Stroke="#E5E5E5" StrokeThickness="1" Padding="12" BackgroundColor="#FFF5F5">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Uitgaven" TextColor="#C62828" FontAttributes="Bold" />
+                        <Label Text="{Binding TotalExpense, StringFormat='€ {0:N2}'}" TextColor="Black" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Grid.Column="2" Stroke="#E5E5E5" StrokeThickness="1" Padding="12" BackgroundColor="#F3F0FF">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Netto" TextColor="#6B46C1" FontAttributes="Bold" />
+                        <Label Text="{Binding TotalNet, StringFormat='€ {0:N2}'}" TextColor="Black" />
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+
+            <Border Stroke="#E5E5E5" StrokeThickness="1" Padding="16">
+                <VerticalStackLayout Spacing="12">
+                    <HorizontalStackLayout Spacing="16">
+                        <HorizontalStackLayout Spacing="6">
+                            <BoxView WidthRequest="12" HeightRequest="12" Color="#48BB78" VerticalOptions="Center" />
+                            <Label Text="Inkomsten" TextColor="Black" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="6">
+                            <BoxView WidthRequest="12" HeightRequest="12" Color="#F56565" VerticalOptions="Center" />
+                            <Label Text="Uitgaven" TextColor="Black" />
+                        </HorizontalStackLayout>
+                    </HorizontalStackLayout>
+
+                    <CollectionView ItemsSource="{Binding Months}"
+                                    SelectionMode="None"
+                                    HeightRequest="260">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Horizontal" ItemSpacing="12" />
+                        </CollectionView.ItemsLayout>
+
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="viewmodel:TransactionChartMonthItem">
+                                <VerticalStackLayout WidthRequest="72" Spacing="8">
+                                    <Grid HeightRequest="170"
+                                          VerticalOptions="End"
+                                          ColumnDefinitions="*,*"
+                                          ColumnSpacing="8">
+                                        <BoxView Grid.Column="0"
+                                                 HeightRequest="{Binding IncomeHeight}"
+                                                 VerticalOptions="End"
+                                                 Color="#48BB78"
+                                                 IsVisible="{Binding HasIncome}" />
+                                        <BoxView Grid.Column="1"
+                                                 HeightRequest="{Binding ExpenseHeight}"
+                                                 VerticalOptions="End"
+                                                 Color="#F56565"
+                                                 IsVisible="{Binding HasExpense}" />
+                                    </Grid>
+
+                                    <Label Text="{Binding MonthLabel}"
+                                           HorizontalTextAlignment="Center"
+                                           TextColor="Black"
+                                           FontAttributes="Bold" />
+
+                                    <Label Text="{Binding Net, StringFormat='€ {0:N0}'}"
+                                           HorizontalTextAlignment="Center"
+                                           TextColor="#6B46C1"
+                                           FontSize="12" />
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+            </Border>
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

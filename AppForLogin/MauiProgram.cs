@@ -79,6 +79,7 @@ namespace AppForLogin
             builder.Services.AddTransient<CategorieDetailPage>();
             builder.Services.AddTransient<TransactionDetailPage>();
             builder.Services.AddTransient<BudgetTransactionsPage>();
+            builder.Services.AddTransient<TransactionChartPage>();
             builder.Services.AddTransient<BudgetPlanPage>();
             builder.Services.AddTransient<BudgetPage>();
             builder.Services.AddTransient<CreateBudgetItemPage>();
@@ -89,6 +90,7 @@ namespace AppForLogin
             builder.Services.AddTransient<UsersAdminViewModel>();
             builder.Services.AddTransient<CategoriesPageViewModel>();
             builder.Services.AddTransient<TransactionsOverViewModel>();
+            builder.Services.AddTransient<TransactionChartPageViewModel>();
             builder.Services.AddTransient<TransactionDetailViewModel>();
             builder.Services.AddTransient<CreateBudgetItemViewModel>();
             builder.Services.AddTransient<CategoriesDetailViewModel>();
