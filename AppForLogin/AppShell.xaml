@@ -37,6 +37,8 @@
         <ShellContent Title="Categories" ContentTemplate="{DataTemplate views:CategoriesPage}" />
         <!-- Pagina voor plan -->
         <ShellContent Title="Plan" ContentTemplate="{DataTemplate views:BudgetPlanPage}" />
+        <!-- Pagina voor CSV Import -->
+        <ShellContent Title="CSV Import" ContentTemplate="{DataTemplate views:CsvImportPage}" Route="CsvImportPage" />
     </FlyoutItem>
 
     <!--<FlyoutItem Title="Login" FlyoutDisplayOptions="AsSingleItem">
